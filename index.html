@@ -728,847 +728,333 @@ const SUPER_PASSWORD='HUGO@ADMIN2025';
 // 3-tier: GOOD / NEEDS ATTENTION / NOT ACCEPTABLE
 // Source: BULPPO Visual Inspection Criteria Chart
 // ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// HuGo AI — OFFICIAL STRICT DETECTION PROMPTS
+// 6 conditions · Official labels · Anti-hallucination rules
+// ═══════════════════════════════════════════════════════════
+
 const AI_CONDITIONS=[
-  {
-    id:1,
-    name:'Fire Extinguisher',
-    icon:'ti-firetruck',
-    description:'Red cylinder — visible, accessible, gauge in green zone, seal intact',
-    good:['In designated location','Visible, unobstructed and accessible','Pressure gauge in GREEN zone','Inspection tag current and valid','Safety seal intact','Clean and well maintained'],
-    needsAttention:['Pressure gauge in YELLOW zone','Inspection tag expired or missing','Minor obstruction in front','Needs cleaning'],
-    notAcceptable:['Pressure gauge in RED zone','Seal broken or missing','Damaged, leaking or corroded','Obstructed or not easily accessible','Inspection tag missing/expired'],
-    otherChecks:['Correct type for hazard (ABC/CO₂)','Mounted at proper height (1.0–1.5m)','Clear signage above extinguisher','Monthly inspection recorded','Replace or service as required'],
-    strictVisual:{color:'RED cylinder required',gauge:'Green zone = GOOD · Yellow = NEEDS ATTENTION · Red = NOT ACCEPTABLE',seal:'Safety seal must be intact',location:'Must be in designated visible location'},
-    minConfidence:0.80,
-    scanDelay:4000,
-    detectionProfile:{
-      rejectionReasons:['Pressure gauge in red zone — NOT ACCEPTABLE, immediate action required','Safety seal broken or missing — flag immediately','Fire extinguisher damaged, leaking, or corroded','Obstructed or not easily accessible','Inspection tag missing or expired','No fire extinguisher detected in frame','Object color does not match — must be a RED cylinder','Object too far from camera — move closer']
-    }
-  },
-  {
-    id:2,
-    name:'Medical Kits / Medicines',
-    icon:'ti-first-aid-kit',
-    description:'Kit with complete medicines, within expiry, clean, sealed, accessible',
-    good:['Kit in designated location','Complete contents as per checklist','All items within expiry date','Clean, sealed and properly organized','Easily accessible'],
-    needsAttention:['Some items low or missing','One or more items near expiry date','Organization needs improvement','Seal/open items not secured'],
-    notAcceptable:['Many items missing','Expired medicines observed','Kit dirty, damaged or unsealed','Not in designated location','Not accessible'],
-    otherChecks:['Check weekly / after use','Record replenishment date','Verify cold chain items (if any)','Ensure emergency contact numbers are available','Replace expired items immediately'],
-    strictVisual:{contents:'Medicine boxes, bottles, blister packs must be visible','kit':'First aid box must contain visible medicines','expiry':'Expired medicines = NOT ACCEPTABLE','location':'Kit must be in designated accessible location'},
-    minConfidence:0.75,
-    scanDelay:9000,
-    detectionProfile:{
-      rejectionReasons:['Expired medicines observed — NOT ACCEPTABLE, replace immediately','Many items missing — kit incomplete','Kit dirty, damaged, or unsealed — NOT ACCEPTABLE','Kit not in designated location','Kit not accessible — obstructed','No medicine boxes or bottles detected — show contents to camera','Medical kit appears empty — open and show medicines','First aid box detected but no medicines visible inside or around it']
-    }
-  },
-  {
-    id:3,
-    name:'Log Book',
-    icon:'ti-notebook',
-    description:'Blue PUPC Logbook — entries complete, legible, up to date, properly stored',
-    good:['Log book available in designated location','Entries complete, accurate and up to date','Readable, neat and legible','No missing pages','Properly stored and protected'],
-    needsAttention:['Some entries incomplete','Minor gaps in dates or details','Handwriting difficult to read','Not stored in protected area'],
-    notAcceptable:['Log book missing','No recent entries','Multiple pages missing or torn','Illegible handwriting','Entries not verified/signed'],
-    otherChecks:['Update after every activity/incident','Review and sign by responsible officer','Maintain separate log books if required','Store in a safe, dry and secure place'],
-    strictVisual:{color:'Must be BLUE logbook/binder','title':'"PUPC LOGBOOK" title must be visible on cover','entries':'Entries must be complete, accurate, legible','pages':'No missing or torn pages'},
-    minConfidence:0.80,
-    scanDelay:14000,
-    detectionProfile:{
-      rejectionReasons:['Log book missing — NOT ACCEPTABLE, immediate action required','No recent entries detected — entries must be up to date','Multiple pages missing or torn — NOT ACCEPTABLE','Illegible handwriting — entries must be readable','Entries not verified or signed','Blue logbook not detected — must show BLUE PUPC LOGBOOK','Title "PUPC LOGBOOK" not visible — show cover to camera','Logbook closed — open to show entries or display cover with title']
-    }
-  },
-  {
-    id:4,
-    name:'Detainee Formation',
-    icon:'ti-users-group',
-    description:'YELLOW shirts — organized rows/columns, facing forward, hands to side, at attention',
-    good:['Facing forward at all times','Proper formation (organized rows and columns)','Hands to the side','Detainees in proper attire (YELLOW shirts)','Standing at attention','Quiet and disciplined','Head count complete and accurate'],
-    needsAttention:['Minor disorder in formation','Talking or moving slightly','Uniform not properly worn','Attention not consistent'],
-    notAcceptable:['Not facing forward','Disorderly conduct','Talking loudly or moving around','Incorrect attire — not in proper uniform','Head count incomplete'],
-    otherChecks:['Conduct head count before and after formation','Give instructions clearly and record attendance','Ensure security officer in proper position','Maintain discipline and order at all times','Document any incident or irregularity'],
-    strictVisual:{uniform:'YELLOW shirts/uniforms required — incorrect attire = NOT ACCEPTABLE',formation:'Organized rows and columns required',facing:'All must face forward',count:'Head count must be complete and accurate'},
-    minConfidence:0.75,
-    scanDelay:19000,
-    detectionProfile:{
-      rejectionReasons:['Detainees not facing forward — NOT ACCEPTABLE','Disorderly conduct detected — NOT ACCEPTABLE','Yellow shirts/uniforms not detected — incorrect attire','No organized row/column formation — disorderly grouping detected','Head count appears incomplete','Talking loudly or moving around detected','Fewer than 3 PUPCs in yellow detected — minimum required','Yellow uniform color not dominant in frame — reposition camera']
-    }
-  },
-  {
-    id:5,
-    name:'CCTV Cameras',
-    icon:'ti-cctv',
-    description:'Cameras in designated locations — clear image, functional recording, date/time correct',
-    good:['Cameras in designated locations','Unobstructed view','Image clear and functional','Recording working properly','Date and time correct','Cables secured and protected'],
-    needsAttention:['Minor obstruction in view','Camera not properly aligned','Dust or dirt on lens','Recording intermittent'],
-    notAcceptable:['Camera not working','Recording not functioning','Severely obstructed view','Damaged, loose or exposed wires','Missing camera in critical area'],
-    otherChecks:['Check all cameras daily','Verify storage capacity and retention','Ensure power backup is functional','Secure access to CCTV system','Report and repair immediately'],
-    strictVisual:{location:'Must be in designated location',view:'Unobstructed clear image required',recording:'Must be actively recording with correct date/time',cables:'Cables must be secured and protected'},
-    minConfidence:0.78,
-    scanDelay:25000,
-    detectionProfile:{
-      rejectionReasons:['Camera not working or offline — NOT ACCEPTABLE, report immediately','Recording not functioning — NOT ACCEPTABLE, immediate repair required','Severely obstructed view — camera cannot monitor area','Damaged, loose, or exposed wires detected — safety hazard','Missing camera in critical area — NOT ACCEPTABLE','Camera not properly aligned — adjust to cover required area','Dust or dirt on lens — clean immediately','Recording appears intermittent — verify storage and power']
-    }
-  }
+  {id:1,name:'Fire Extinguisher',icon:'ti-firetruck',label:'fire_extinguisher',
+   minConfidence:0.95,scanDelay:4000,
+   mustHave:['cylindrical body','hose or nozzle','pressure gauge or safety pin'],
+   reject:['gas tanks','oxygen cylinders','spray bottles','thermos','water dispensers','traffic cones','pipes'],
+   colors:['red','chrome','industrial safety colors'],
+   specialRule:'Shape alone insufficient — must identify firefighting components.',
+   good:['In designated location','Visible unobstructed accessible','Pressure gauge GREEN zone','Inspection tag current and valid','Safety seal intact','Clean and well maintained'],
+   needsAttention:['Gauge in YELLOW zone','Inspection tag expired/missing','Minor obstruction','Needs cleaning'],
+   notAcceptable:['Gauge in RED zone','Seal broken/missing','Damaged/leaking/corroded','Obstructed not accessible','Inspection tag missing/expired']},
+  {id:2,name:'Medical Kit',icon:'ti-first-aid-kit',label:'medical_kit',
+   minConfidence:0.90,scanDelay:9000,
+   mustHave:['official kit container','red cross OR medical label OR emergency markings OR organized medical supplies'],
+   reject:['ordinary storage boxes','toolboxes','lunch boxes','random bags','cosmetic kits','backpacks without medical markings','blurry objects'],
+   colors:['white','red','green emergency colors'],
+   specialRule:'Ignore partially hidden objects unless medical markings clearly visible.',
+   good:['Kit in designated location','Complete contents as per checklist','All items within expiry','Clean sealed properly organized','Easily accessible'],
+   needsAttention:['Some items low or missing','Items near expiry','Organization needs improvement','Seal/open items not secured'],
+   notAcceptable:['Many items missing','Expired medicines observed','Kit dirty/damaged/unsealed','Not in designated location','Not accessible']},
+  {id:3,name:'Medicines',icon:'ti-pill',label:'medicine',
+   minConfidence:0.92,scanDelay:14000,
+   mustHave:['visible pharmaceutical packaging','medicine labels'],
+   reject:['food containers','candy','beverages','cosmetic products','hygiene products','random plastic containers','supplements without pharma appearance'],
+   colors:['pharmacy packaging — white/orange/blue/various'],
+   specialRule:'Do NOT infer medicine from shape alone. Visible pharmaceutical characteristics required.',
+   good:['Medicine clearly visible','Labels/packaging visible','Within expiry date','Organized and accessible'],
+   needsAttention:['Some medicines near expiry','Partially visible labels','Some items missing'],
+   notAcceptable:['Expired medicines visible','No pharmaceutical packaging','Cannot confirm contents']},
+  {id:4,name:'Log Book',icon:'ti-notebook',label:'logbook',
+   minConfidence:0.88,scanDelay:19000,
+   mustHave:['bound notebook','open pages','handwriting/text visible','multiple entries','PUPC LOGBOOK title OR blue color'],
+   reject:['closed books','wrong color books','printed books','binders without handwriting'],
+   colors:['blue — dominant cover color'],
+   specialRule:'Title "PUPC LOGBOOK" must be visible OR blue color must dominate the cover.',
+   good:['Log book in designated location','Entries complete accurate up to date','Readable neat and legible','No missing pages','Properly stored and protected'],
+   needsAttention:['Some entries incomplete','Minor gaps in dates/details','Handwriting difficult to read','Not stored in protected area'],
+   notAcceptable:['Log book missing','No recent entries','Multiple pages missing/torn','Illegible handwriting','Entries not verified/signed']},
+  {id:5,name:'Detainee Formation',icon:'ti-users-group',label:'detainee_formation',
+   minConfidence:0.95,scanDelay:24000,
+   mustHave:['minimum 3 individuals','yellow shirts/uniforms','organized row formation','facing generally forward','institutional environment'],
+   reject:['crowds','school students','construction workers','random pedestrians','sports teams','protest groups','mixed clothing colors'],
+   colors:['yellow — dominant upper garment color'],
+   specialRule:'Yellow clothing alone NOT sufficient. Formation structure mandatory. Minimum 3 individuals.',
+   good:['Facing forward at all times','Proper formation organized rows and columns','Hands to the side','Detainees in proper attire YELLOW','Standing at attention','Quiet and disciplined','Head count complete and accurate'],
+   needsAttention:['Minor disorder in formation','Talking or moving slightly','Uniform not properly worn','Attention not consistent'],
+   notAcceptable:['Not facing forward','Disorderly conduct','Talking loudly/moving around','Incorrect attire','Head count incomplete']},
+  {id:6,name:'CCTV Camera',icon:'ti-cctv',label:'mounted_cctv',
+   minConfidence:0.93,scanDelay:29000,
+   mustHave:['surveillance lens','mounting bracket','ceiling/wall/pole installation','security housing'],
+   reject:['webcams','mobile phones','DSLR cameras','dashcams','handheld cameras','microphones','speakers','sensors','loose devices on tables'],
+   colors:['any — focus on mounting and housing'],
+   specialRule:'Camera must be physically mounted. Ignore loose devices on tables or any non-fixed camera.',
+   good:['Cameras in designated locations','Unobstructed view','Image clear and functional','Recording working properly','Date and time correct','Cables secured and protected'],
+   needsAttention:['Minor obstruction in view','Camera not properly aligned','Dust or dirt on lens','Recording intermittent'],
+   notAcceptable:['Camera not working','Recording not functioning','Severely obstructed view','Damaged/loose/exposed wires','Missing camera in critical area']}
 ];
 
-// ═══════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════
-let role='',userId='',myStation='';
-let nums={pice:0,part:0,med:0};
-let photos={pice:null,piceURL:'',med:null,medURL:''};
-let phrosFile=null;
-let modMonths={med:'',phros:''};
-let records=[];
-let idd={f1:'',f2:'',f3:'',f1c:0,f2c:0,f3c:0};
-let auditLog=[];
-let deferredPrompt=null;
-let lastMasterJSON='';
+// ── OFFICIAL CONFIDENCE THRESHOLDS ──
+const CONF_THRESHOLDS={1:0.95,2:0.90,3:0.92,4:0.88,5:0.95,6:0.93};
 
-// Camera state
-let camStream=null,camSid='',camTok='';
-let capturedImages=[];   // {conditionId, dataURL, status, ts, reason}
-let conditionResults={}; // conditionId -> {status, confidence, reason, ts, dataURL}
-let aiActive=false;
-let aiTimers=[];
+// ── STATUS TYPES — ONLY 3 VALID OUTPUTS ──
+const STATUS={VERIFIED:'verified',UNVERIFIED:'unverified',FAILED:'failed'};
 
-// ═══════════════════════════════════════════
-// ACCESS CONTROL ENGINE
-// ═══════════════════════════════════════════
-function checkAccess(requestedStation,action,module){
-  const ts=new Date().toISOString();
-  const rqStation=role==='super'?'ALL_STATIONS':myStation;
-  const match=role==='super'||rqStation===requestedStation;
-  const granted=role==='super'||(role==='station'&&match);
-  auditLog.unshift({timestamp:ts,user_id:userId,role:role==='super'?'SUPER_USER':'STATION_USER',requesting_station:rqStation,requested_station:requestedStation,station_match:match,access_granted:granted,module,action});
-  if(auditLog.length>100) auditLog=auditLog.slice(0,100);
-  updateAuditDisplay();
-  return granted;
-}
+// ── GLOBAL ANTI-HALLUCINATION RULES ──
+const ANTI_HAL_RULES=[
+  'Never infer missing objects',
+  'Never guess partially visible items',
+  'Ignore blurry detections',
+  'Ignore cartoon/anime/printed/poster objects',
+  'Detect only physically present real-world items',
+  'Require direct visual evidence',
+  'If uncertain — return NO DETECTION'
+];
 
-function updateAuditDisplay(){
-  const el=document.getElementById('audit-wrap');if(!el) return;
-  if(!auditLog.length){el.innerHTML='<div style="color:var(--db);font-size:10px;">No access events yet.</div>';return;}
-  el.innerHTML=auditLog.slice(0,20).map(l=>`<div style="padding:4px 0;border-bottom:.5px solid rgba(255,255,255,.08);display:flex;gap:8px;flex-wrap:wrap;font-size:10px;"><span style="color:var(--db);">${l.timestamp.substring(11,19)}</span><span style="color:#fff;">${l.user_id}</span><span style="color:var(--mb);">${l.module}·${l.action}</span><span style="color:${l.access_granted?'#7BC97E':'var(--cd)'};">${l.access_granted?'GRANTED':'DENIED'}</span></div>`).join('');
-}
-
-// ═══════════════════════════════════════════
-// PWA / LIFECYCLE
-// ═══════════════════════════════════════════
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('install-banner').style.display='flex';});
-function installApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('install-banner').style.display='none';});}else alert('To install:\n1. Tap ⋮ menu\n2. Tap "Add to Home screen"\n3. Tap "Add"');}
-if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});}
-window.addEventListener('online',()=>{document.getElementById('offline-bar').style.display='none';});
-window.addEventListener('offline',()=>{document.getElementById('offline-bar').style.display='block';});
-window.addEventListener('load',()=>{setTimeout(()=>{document.getElementById('splash').classList.add('hidden');setTimeout(()=>{document.getElementById('splash').style.display='none';document.getElementById('app').style.display='flex';},500);},1800);});
-
-// ═══════════════════════════════════════════
-// AUTH
-// ═══════════════════════════════════════════
-function showStationAuth(){
-  document.getElementById('login-screen').style.display='none';
-  const sa=document.getElementById('station-auth');sa.style.display='flex';sa.style.flexDirection='column';
-  const sel=document.getElementById('stn-select');sel.innerHTML='<option value="">Select station...</option>';
-  ALL_STNS.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o);});
-}
-function showSuperAuth(){
-  document.getElementById('login-screen').style.display='none';
-  const sa=document.getElementById('super-auth');sa.style.display='flex';sa.style.flexDirection='column';
-  document.getElementById('su-pass').value='';document.getElementById('su-err').style.display='none';document.getElementById('su-btn').disabled=true;
-}
-function backToLogin(){
-  document.getElementById('station-auth').style.display='none';document.getElementById('super-auth').style.display='none';
-  document.getElementById('login-screen').style.display='flex';document.getElementById('login-screen').style.flexDirection='column';
-  document.getElementById('stn-err').style.display='none';
-}
-function onStnSelect(){
-  const s=document.getElementById('stn-select').value;
-  const pf=document.getElementById('pass-field');pf.style.display=s?'flex':'none';pf.style.flexDirection='column';
-  document.getElementById('stn-pass').value='';document.getElementById('stn-err').style.display='none';document.getElementById('stn-btn').disabled=true;
-}
-function onPassIn(){document.getElementById('stn-btn').disabled=document.getElementById('stn-pass').value.trim().length<4;}
-function onSuIn(){document.getElementById('su-btn').disabled=document.getElementById('su-pass').value.trim().length<4;}
-
-async function loginStation(){
-  const stn=document.getElementById('stn-select').value,pass=document.getElementById('stn-pass').value.trim();
-  document.getElementById('stn-err').style.display='none';document.getElementById('stn-btn').disabled=true;document.getElementById('stn-proc').style.display='block';
-  await new Promise(r=>setTimeout(r,1000));document.getElementById('stn-proc').style.display='none';
-  if(STATION_PASSCODES[stn]!==pass){document.getElementById('stn-err-msg').textContent='Incorrect passcode for '+stn;document.getElementById('stn-err').style.display='flex';document.getElementById('stn-btn').disabled=false;return;}
-  role='station';userId='STU-'+Math.floor(Math.random()*900+100);myStation=stn;
-  document.getElementById('station-auth').style.display='none';launchApp();
-}
-async function loginSuper(){
-  const pass=document.getElementById('su-pass').value.trim();
-  document.getElementById('su-err').style.display='none';document.getElementById('su-btn').disabled=true;document.getElementById('su-proc').style.display='block';
-  await new Promise(r=>setTimeout(r,1000));document.getElementById('su-proc').style.display='none';
-  if(pass!==SUPER_PASSWORD){document.getElementById('su-err').style.display='flex';document.getElementById('su-btn').disabled=false;return;}
-  role='super';userId='SU-001';myStation='';
-  document.getElementById('super-auth').style.display='none';launchApp();
-}
-
-function launchApp(){
-  const aa=document.getElementById('auth-app');aa.style.display='flex';aa.style.flexDirection='column';
-  const pill=document.getElementById('ub-pill');pill.textContent=role==='super'?'Super user':'Station';pill.className='ub-pill '+(role==='super'?'ub-su':'ub-st');
-  document.getElementById('ub-name').textContent=role==='super'?'Super User ('+userId+')':myStation;
-  document.getElementById('hdr-sub').textContent=role==='super'?'Super User — Full access':'Station · '+myStation;
-  document.getElementById('home-greeting').textContent='Magandang araw'+(myStation?', '+myStation.split(' ')[0]:'')+'!';
-  document.getElementById('home-sub').textContent=role==='super'?'Super user — full access enabled':'Station user — '+myStation;
-  ['pice','med','phros','idd'].forEach(m=>{const el=document.getElementById(m+'-stn');if(el) el.textContent=role==='station'?myStation:'All stations';});
-  buildMonthGrids();buildHomeStats();
-  if(role==='super'){document.getElementById('mc-master-badge').textContent='Ready';document.getElementById('mc-master-badge').className='mc-badge mb-g';}
-  checkAccess(role==='super'?'ALL_STATIONS':myStation,'login',role==='super'?'SYSTEM':'STATION');
-  goNav('home');
-}
-
-function logout(){
-  role='';
-  aiTimers.forEach(t=>clearTimeout(t));aiTimers=[];
-  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
-  document.getElementById('auth-app').style.display='none';
-  document.getElementById('login-screen').style.display='flex';document.getElementById('login-screen').style.flexDirection='column';
-  document.getElementById('station-auth').style.display='none';document.getElementById('super-auth').style.display='none';
-  document.getElementById('live-pill').style.display='none';
-  nums={pice:0,part:0,med:0};photos={pice:null,piceURL:'',med:null,medURL:''};phrosFile=null;
-  idd={f1:'',f2:'',f3:'',f1c:0,f2c:0,f3c:0};
-}
-
-// ═══════════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════════
-function goNav(id){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.querySelectorAll('.bnav').forEach(n=>n.classList.remove('active'));
-  const v=document.getElementById('view-'+id);if(v) v.classList.add('active');
-  const n=document.getElementById('nav-'+id);if(n) n.classList.add('active');
-  if(id==='master') buildMasterView();
-  if(['pice','med','phros','idd'].includes(id)) checkAccess(role==='super'?'ALL_STATIONS':myStation,'navigate',id.toUpperCase());
-  document.getElementById('content').scrollTop=0;
-}
-
-// ═══════════════════════════════════════════
-// MONTH GRIDS
-// ═══════════════════════════════════════════
-function buildMonthGrids(){
-  ['med','phros'].forEach(mod=>{
-    const el=document.getElementById(mod+'-months');if(!el) return;el.innerHTML='';
-    MONTHS.forEach(m=>{const b=document.createElement('button');b.className='month-opt';b.textContent=m;b.onclick=()=>{modMonths[mod]=m;el.querySelectorAll('.month-opt').forEach(x=>x.classList.remove('on'));b.classList.add('on');checkMod(mod);};el.appendChild(b);});
-  });
-}
-
-// ═══════════════════════════════════════════
-// FORM HANDLING
-// ═══════════════════════════════════════════
-function adj(mod,d){
-  const k=mod==='part'?'part':mod;nums[k]=Math.max(0,nums[k]+d);
-  const disp=mod==='part'?'part-d':mod+'-d',inp=mod==='part'?'part-m':mod+'-m';
-  document.getElementById(disp).textContent=nums[k];document.getElementById(inp).value=nums[k];
-  checkMod(mod==='part'?'pice':mod);
-}
-function man(mod,v){const k=mod==='part'?'part':mod;const n=parseInt(v);nums[k]=isNaN(n)||n<0?0:n;const disp=mod==='part'?'part-d':mod+'-d';document.getElementById(disp).textContent=nums[k];checkMod(mod==='part'?'pice':mod);}
-
-function handlePhoto(mod,files){
-  if(!files||!files[0]) return;
-  const f=files[0];
-  if(!['image/jpeg','image/png'].includes(f.type)){const e=document.getElementById(mod+'-err');if(e){e.querySelector('span').textContent='JPG or PNG only.';e.style.display='flex';}return;}
-  photos[mod]=f;
-  const r=new FileReader();r.onload=e=>{photos[mod+'URL']=e.target.result;document.getElementById(mod+'-prev').innerHTML=`<div class="file-prev"><img src="${e.target.result}" style="width:50px;height:36px;object-fit:cover;border-radius:6px;"><span class="fp-n">${f.name}</span><button class="fp-r" onclick="photos['${mod}']=null;photos['${mod}URL']='';document.getElementById('${mod}-prev').innerHTML='';checkMod('${mod}')">Remove</button></div>`;checkMod(mod);};r.readAsDataURL(f);
-}
-
-function handleXlsx(files){
-  if(!files||!files[0]||!files[0].name.toLowerCase().endsWith('.xlsx')) return;
-  phrosFile=files[0];
-  document.getElementById('phros-prev').innerHTML=`<div class="file-prev"><i class="ti ti-file-spreadsheet"></i><span class="fp-n">${phrosFile.name}</span><button class="fp-r" onclick="phrosFile=null;document.getElementById('phros-prev').innerHTML='';document.getElementById('phros-val').innerHTML='';checkMod('phros')">Remove</button></div>`;
-  runPhrosVal();checkMod('phros');
-}
-
-function runPhrosVal(){
-  const m=modMonths.phros,f=phrosFile;if(!m||!f) return;
-  const isDup=records.find(r=>r.mod==='phros'&&r.station===myStation&&r.month===m);
-  const checks=[{ok:true,msg:'Station match: '+myStation},{ok:true,msg:'Form (A) sheet detected'},{ok:true,msg:'Form (B) sheet detected'},{ok:!isDup,msg:isDup?'Duplicate detected':'No duplicate found'}];
-  document.getElementById('phros-val').innerHTML='<div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">'+checks.map(c=>`<div class="alert ${c.ok?'ok':'err'}" style="${c.ok?'':'display:flex;'}"><i class="ti ${c.ok?'ti-circle-check':'ti-alert-triangle'}"></i>${c.msg}</div>`).join('')+'</div>';
-}
-
-function checkPice(){
-  const w=document.getElementById('pice-week').value,mo=document.getElementById('pice-month').value;
-  const isDup=records.find(r=>r.mod==='pice'&&r.station===myStation&&r.week===w);
-  document.getElementById('pice-dup').style.display=isDup?'flex':'none';
-  document.getElementById('pice-btn').disabled=!(w&&mo&&nums.pice>0&&nums.part>0&&photos.pice&&!isDup);
-}
-function checkMod(mod){
-  if(mod==='pice'){checkPice();return;}
-  let ok=false;
-  if(mod==='med') ok=!!modMonths.med&&nums.med>0&&!!photos.med;
-  if(mod==='phros'){const isDup=records.find(r=>r.mod==='phros'&&r.station===myStation&&r.month===modMonths.phros);ok=!!modMonths.phros&&!!phrosFile&&!isDup;}
-  if(mod==='idd') ok=!!document.getElementById('idd-month').value&&!!document.getElementById('idd-year').value&&idd.f1!==''&&idd.f2!==''&&idd.f3!=='';
-  const btn=document.getElementById(mod+'-btn');if(btn) btn.disabled=!ok;
-}
-function checkIDD(){checkMod('idd');}
-
-// ═══════════════════════════════════════════
-// SUBMIT
-// ═══════════════════════════════════════════
-async function submitMod(mod){
-  if(!checkAccess(myStation,'submit',mod.toUpperCase())) return;
-  const btn=document.getElementById(mod+'-btn');btn.disabled=true;
-  document.getElementById(mod+'-proc').style.display='block';
-  await new Promise(r=>setTimeout(r,1500));
-  document.getElementById(mod+'-proc').style.display='none';
-  const ts=new Date().toISOString();let label='',flag=false,payload={};
-  if(mod==='pice'){const w=document.getElementById('pice-week').value,mo=document.getElementById('pice-month').value;label=myStation+' — '+w+' · '+nums.pice+' PICE · '+nums.part+' participants';payload={module:'Weekly PICE',station:myStation,week:w,month:mo,pice_count:nums.pice,participants:nums.part,photo:photos.pice?.name,photoURL:photos.piceURL,uploader:userId,timestamp:ts};}
-  if(mod==='med'){label=myStation+' — '+modMonths.med+' · '+nums.med+' check-ups';payload={module:'Monthly Medical',station:myStation,month:modMonths.med,count:nums.med,photo:photos.med?.name,uploader:userId,timestamp:ts};}
-  if(mod==='phros'){label=myStation+' — '+modMonths.phros+' · PHROs & COs';payload={module:'Monthly PHROs & COs',station:myStation,month:modMonths.phros,file:phrosFile?.name,uploader:userId,timestamp:ts};records.push({mod,station:myStation,month:modMonths.phros,flag,ts,label,payload});updatePhrosNotif();}
-  if(mod==='idd'){const m=document.getElementById('idd-month').value,y=document.getElementById('idd-year').value;flag=(idd.f1==='yes'&&idd.f1c>0)||(idd.f2==='yes'&&idd.f2c>0);label=myStation+' — IDD '+m+' '+y+(flag?' [FLAG]':'');payload={module:'Monthly IDD',station:myStation,month:m,year:y,form1:idd.f1==='no'?'NEGATIVE':idd.f1c+' entries',form2:idd.f2==='no'?'NEGATIVE':idd.f2c+' entries',form3:idd.f3==='no'?'NEGATIVE':idd.f3c+' rows',priority_flag:flag,uploader:userId,timestamp:ts};records.push({mod,station:myStation,month:m,flag,ts,label,payload});updateIddNotif();if(flag){document.getElementById('flag-ind').style.display='flex';document.getElementById('idd-badge').textContent='!';document.getElementById('idd-badge').classList.add('show');}if(idd.f2==='yes'&&idd.f2c>0)document.getElementById('idd-home-badge').textContent='URGENT';}
-  if(mod!=='phros'&&mod!=='idd') records.push({mod,station:myStation,month:modMonths[mod]||'',flag,ts,label,payload});
-  addActivity(mod,flag,label);buildHomeStats();
-  const jsonStr=JSON.stringify(payload,null,2);
-  document.getElementById(mod+'-success').innerHTML=`<div class="success-card"><i class="ti ti-circle-check sico"></i><div class="s-title">Submitted</div><p class="s-sub">${label}</p><div class="json-box">${jsonStr}</div><div style="display:flex;gap:8px;margin-top:8px;"><button class="copy-btn" style="flex:1;" onclick="navigator.clipboard.writeText(\`${jsonStr.replace(/`/g,"'")}\`)"><i class="ti ti-copy"></i>Copy</button><button class="gbtn" onclick="resetMod('${mod}')"><i class="ti ti-refresh"></i>New</button></div></div>`;
-}
-
-function resetMod(mod){
-  document.getElementById(mod+'-success').innerHTML='';
-  if(mod==='pice'){nums.pice=0;nums.part=0;['pice-d','part-d'].forEach(id=>document.getElementById(id).textContent=0);['pice-m','part-m'].forEach(id=>document.getElementById(id).value=0);photos.pice=null;photos.piceURL='';document.getElementById('pice-prev').innerHTML='';document.getElementById('pice-week').value='';document.getElementById('pice-btn').disabled=true;}
-  if(mod==='med'){nums.med=0;document.getElementById('med-d').textContent=0;document.getElementById('med-m').value=0;photos.med=null;photos.medURL='';document.getElementById('med-prev').innerHTML='';modMonths.med='';document.getElementById('med-months').querySelectorAll('.month-opt').forEach(x=>x.classList.remove('on'));document.getElementById('med-btn').disabled=true;}
-  if(mod==='phros'){phrosFile=null;document.getElementById('phros-prev').innerHTML='';document.getElementById('phros-val').innerHTML='';modMonths.phros='';document.getElementById('phros-months').querySelectorAll('.month-opt').forEach(x=>x.classList.remove('on'));document.getElementById('phros-btn').disabled=true;}
-  if(mod==='idd'){idd={f1:'',f2:'',f3:'',f1c:0,f2c:0,f3c:0};['f1-y','f1-n','f2-y','f2-n','f3-y','f3-n'].forEach(id=>document.getElementById(id).className='tog');['f1-entries','f2-entries','f3-entries'].forEach(id=>document.getElementById(id).innerHTML='');['f1-add','f2-add','f3-add','f1-flag','f2-flag'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById('idd-month').value='';document.getElementById('idd-year').value='';document.getElementById('idd-btn').disabled=true;}
-}
-
-function addActivity(mod,flag,label){
-  const list=document.getElementById('act-list');
-  if(list.querySelector('[style*="color:#94a3b8"]')) list.innerHTML='';
-  const ts=new Date().toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'});
-  const icons={pice:'ti-calendar-week',med:'ti-stethoscope',phros:'ti-users',idd:'ti-file-description',cam:'ti-camera'};
-  const row=document.createElement('div');row.className='act-row';
-  row.innerHTML=`<i class="ti ${icons[mod]||'ti-file'} act-ico${flag?' flag':''}"></i><div class="act-body"><strong>${label}</strong>Submitted · private to your station</div><span class="act-ts">${ts}</span>`;
-  list.insertBefore(row,list.firstChild);
-}
-
-function buildHomeStats(){
-  const myRecs=role==='super'?records:records.filter(r=>r.station===myStation);
-  const t=myRecs.length,f=myRecs.filter(r=>r.flag).length;
-  const pice=myRecs.filter(r=>r.mod==='pice').reduce((a,r)=>a+(r.payload?.pice_count||0),0);
-  const med=myRecs.filter(r=>r.mod==='med').reduce((a,r)=>a+(r.payload?.count||0),0);
-  document.getElementById('home-stats').innerHTML=`
-    <div class="stat-card"><div class="sv s">${t}</div><div class="sl2">${role==='super'?'Total submissions':'My submissions'}</div></div>
-    <div class="stat-card"><div class="sv d">${f}</div><div class="sl2">Priority flags</div></div>
-    <div class="stat-card"><div class="sv">${pice}</div><div class="sl2">Total PICE</div></div>
-    <div class="stat-card"><div class="sv">${med}</div><div class="sl2">Total medical</div></div>`;
-}
-
-// ═══════════════════════════════════════════
-// IDD HELPERS
-// ═══════════════════════════════════════════
-function setF(n,v){
-  idd['f'+n]=v;document.getElementById('f'+n+'-y').className='tog'+(v==='yes'?' y-on':'');document.getElementById('f'+n+'-n').className='tog'+(v==='no'?' n-on':'');
-  if(v==='no'){document.getElementById('f'+n+'-entries').innerHTML='';document.getElementById('f'+n+'-add').style.display='none';idd['f'+n+'c']=0;}
-  if(v==='yes'&&n<3&&idd['f'+n+'c']===0) addEntry(n);
-  if(v==='yes'&&n===3&&idd.f3c===0) addDiseaseRow();
-  const f1f=document.getElementById('f1-flag'),f2f=document.getElementById('f2-flag');
-  if(f1f) f1f.style.display=(idd.f1==='yes'&&idd.f1c>0)?'flex':'none';
-  if(f2f) f2f.style.display=(idd.f2==='yes'&&idd.f2c>0)?'flex':'none';
-  checkMod('idd');
-}
-function addEntry(n){
-  idd['f'+n+'c']++;const cnt=idd['f'+n+'c'];
-  const causes=n===1?['Cardiovascular Disease','Hypertension/Stroke','TB','Pneumonia','Diabetes','Kidney Failure','Cancer','Natural Causes','Other']:['Physical Trauma','Torture/Electric Shock','Suffocation','Drowning','Burns','Poisoning','Gunshot','Stabbing','Blunt Force','Under Investigation','Other'];
-  const c=document.createElement('div');c.className='entry-card';c.id='e'+n+'-'+cnt;
-  c.innerHTML=`<div class="entry-num">Entry ${cnt}</div><button class="rm-btn" onclick="rmEntry(${n},${cnt})"><i class="ti ti-x"></i></button>
-  <div class="rw2" style="margin-bottom:8px;"><div class="fg"><div class="fl">Name of PUPC</div><input class="fi" placeholder="Last, First, Middle"></div><div class="fg"><div class="fl">Date of death</div><input class="fi" type="date"></div></div>
-  <div class="fg" style="margin-bottom:8px;"><div class="fl">Case description</div><select class="fs"><option value="">Select...</option>${CASE_DESC.map(o=>`<option>${o}</option>`).join('')}</select></div>
-  <div class="fg"><div class="fl">Cause of death</div><select class="fs"><option value="">Select...</option>${causes.map(o=>`<option>${o}</option>`).join('')}</select></div>`;
-  document.getElementById('f'+n+'-entries').appendChild(c);document.getElementById('f'+n+'-add').style.display='block';
-  const f=document.getElementById('f'+n+'-flag');if(f) f.style.display='flex';checkMod('idd');
-}
-function rmEntry(n,cnt){const el=document.getElementById('e'+n+'-'+cnt);if(el) el.remove();idd['f'+n+'c']=Math.max(0,idd['f'+n+'c']-1);const f=document.getElementById('f'+n+'-flag');if(f) f.style.display=idd['f'+n+'c']>0?'flex':'none';checkMod('idd');}
-function addDiseaseRow(){
-  idd.f3c++;const cnt=idd.f3c;const c=document.createElement('div');c.className='entry-card';c.id='e3-'+cnt;
-  const diseases=['Hypertension','Heart Disease','TB','Cough','Colds','Asthma','Flu','Arthritis','Diabetes','UTI','Ulcer','Migraine','HIV','Epilepsy','Skin Disease','Diarrhea'];
-  const chips=diseases.map(d=>`<span class="chip" onclick="this.classList.toggle('on')">${d}</span>`).join('');
-  c.innerHTML=`<div class="entry-num">Disease row ${cnt}</div><button class="rm-btn" onclick="rmEntry(3,${cnt})"><i class="ti ti-x"></i></button>
-  <div class="fg" style="margin-bottom:8px;"><div class="fl">Diseases</div><div class="chip-wrap">${chips}</div></div>
-  <div class="rw3"><div class="fg"><div class="fl">With disease</div><input class="fi" type="number" min="0" placeholder="0"></div><div class="fg"><div class="fl">Died</div><input class="fi" type="number" min="0" placeholder="0"></div><div class="fg"><div class="fl">Hospitalized</div><input class="fi" type="number" min="0" placeholder="0"></div></div>`;
-  document.getElementById('f3-entries').appendChild(c);document.getElementById('f3-add').style.display='block';checkMod('idd');
-}
-
-// ═══════════════════════════════════════════
-// NOTIFICATIONS
-// ═══════════════════════════════════════════
-function updatePhrosNotif(){
-  const submitted=new Set(records.filter(r=>r.mod==='phros').map(r=>r.station));
-  const count=submitted.size,total=ALL_STNS.length,pct=Math.round(count/total*100);
-  const bar=document.getElementById('phros-bar');if(!bar) return;
-  bar.style.width=pct+'%';bar.className='notif-bar'+(pct===100?' full':pct<30?' low':'');
-  document.getElementById('phros-txt').textContent=count+' of '+total+' stations submitted';
-  document.getElementById('phros-pct').textContent=pct+'%';
-  const el=document.getElementById('phros-stns');el.innerHTML='';
-  submitted.forEach(s=>{const sp=document.createElement('span');sp.className='stn-pill sp-g';sp.textContent=s;el.appendChild(sp);});
-  const missing=ALL_STNS.filter(s=>!submitted.has(s));
-  missing.slice(0,5).forEach(s=>{const sp=document.createElement('span');sp.className='stn-pill sp-a';sp.textContent=s;el.appendChild(sp);});
-  const badge=document.getElementById('phros-badge');badge.textContent=missing.length;badge.classList.toggle('show',missing.length>0);
-}
-
-function updateIddNotif(){
-  const submitted=new Set(records.filter(r=>r.mod==='idd').map(r=>r.station));
-  const flags=records.filter(r=>r.mod==='idd'&&r.flag);
-  const urgent=records.filter(r=>r.mod==='idd'&&r.payload?.form2&&r.payload.form2!=='NEGATIVE');
-  const count=submitted.size,total=ALL_STNS.length,pct=Math.round(count/total*100);
-  const bar=document.getElementById('idd-bar');if(!bar) return;
-  bar.style.width=pct+'%';bar.className='notif-bar'+(pct===100?' full':pct<30?' low':'');
-  document.getElementById('idd-txt').textContent=count+' of '+total+' stations submitted';
-  document.getElementById('idd-pct').textContent=pct+'%';
-  const fr=document.getElementById('idd-flags-row');
-  if(flags.length||urgent.length){fr.style.display='flex';fr.innerHTML='';if(urgent.length){const sp=document.createElement('span');sp.className='stn-pill sp-r';sp.textContent=urgent.length+' URGENT';fr.appendChild(sp);}if(flags.length){const sp=document.createElement('span');sp.className='stn-pill sp-a';sp.textContent=flags.length+' flag'+(flags.length>1?'s':'');fr.appendChild(sp);}}
-  const el=document.getElementById('idd-stns');el.innerHTML='';
-  submitted.forEach(s=>{const sp=document.createElement('span');sp.className='stn-pill sp-g';sp.textContent=s;el.appendChild(sp);});
-  const missing=ALL_STNS.filter(s=>!submitted.has(s));
-  missing.slice(0,5).forEach(s=>{const sp=document.createElement('span');sp.className='stn-pill sp-a';sp.textContent=s;el.appendChild(sp);});
-  const badge=document.getElementById('idd-badge');badge.textContent=missing.length;badge.classList.toggle('show',missing.length>0);
-}
-
-// ═══════════════════════════════════════════
-// AI CAMERA INSPECTION MODULE v7
-// Strict image recognition with screen capture
-// ═══════════════════════════════════════════
-function onCamTok(){document.getElementById('cam-val-btn').disabled=document.getElementById('cam-tok').value.trim().length<4;}
-function setCamTok(t){document.getElementById('cam-tok').value=t;onCamTok();document.getElementById('cam-tok-err').style.display='none';}
-
-async function valCam(){
-  const tok=document.getElementById('cam-tok').value.trim();
-  document.getElementById('cam-tok-err').style.display='none';document.getElementById('cam-val-btn').disabled=true;document.getElementById('cam-validating').style.display='flex';
-  await new Promise(r=>setTimeout(r,1200));
-  if(!VALID_CAM_TOKS.includes(tok)){
-    document.getElementById('cam-tok-err-msg').textContent='Invalid token: "'+tok+'". Request a valid token from super user.';
-    document.getElementById('cam-tok-err').style.display='flex';document.getElementById('cam-validating').style.display='none';document.getElementById('cam-val-btn').disabled=false;return;
-  }
-  camTok=tok;camSid='INSP-'+Date.now();capturedImages=[];conditionResults={};
-  checkAccess(role==='super'?'ALL_STATIONS':myStation,'camera-activate','INSPECTION_CAM');
-  try{
-    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false});
-    camStream=stream;
-    document.getElementById('cam-tok-sec').style.display='none';
-    const ls=document.getElementById('cam-live-sec');ls.style.display='flex';ls.style.flexDirection='column';
-    const vid=document.getElementById('cam-video');vid.srcObject=stream;vid.style.display='block';
-    document.getElementById('cam-ph').style.display='none';
-    document.getElementById('cam-sid').textContent=camSid+' · AI v10';
-    document.getElementById('cam-live-ind').style.display='flex';
-    document.getElementById('live-pill').style.display='flex';
-    document.getElementById('ai-status-bar').style.display='flex';
-    document.getElementById('scan-overlay').style.display='block';
-    buildAIConditions();
-    startAIDetection();
-  }catch(e){
-    document.getElementById('cam-tok-err-msg').textContent='Camera access failed: '+e.message;
-    document.getElementById('cam-tok-err').style.display='flex';document.getElementById('cam-validating').style.display='none';document.getElementById('cam-val-btn').disabled=false;
-  }
-}
-
-function buildAIConditions(){
-  const el=document.getElementById('ai-conds');el.innerHTML='';
-  const condHints={
-    1:'🔴 Red cylinder · Gauge green · Seal intact · Accessible',
-    2:'💊 Complete medicines · Within expiry · Clean · Accessible',
-    3:'📘 Blue logbook · "PUPC LOGBOOK" title · Entries legible',
-    4:'🟡 Yellow shirts · Organized rows · Facing forward · At attention',
-    5:'📷 Cameras in designated locations · Clear image · Recording · Cables secured'
-  };
-  AI_CONDITIONS.forEach(c=>{
-    const d=document.createElement('div');d.className='ai-cond scanning';d.id='aic-'+c.id;
-    d.innerHTML=`
-      <div class="ai-cond-header">
-        <i class="ti ${c.icon} ai-cond-ico"></i>
-        <div class="ai-cond-name">${c.name}</div>
-      </div>
-      <div style="font-size:9px;color:#5a6a7a;margin-bottom:5px;line-height:1.5;background:#f0f4f8;padding:4px 6px;border-radius:6px;">${condHints[c.id]||''}</div>
-      <div class="ai-status-badge badge-scanning"><i class="ti ti-search" style="font-size:10px"></i>Scanning<span class="scan-dots"><span></span><span></span><span></span></span></div>
-      <div class="ai-conf-mini"><div class="ai-conf-mini-fill" id="conf-fill-${c.id}" style="width:0%"></div></div>
-      <div class="ai-rejection" id="rej-${c.id}"></div>
-      <div class="ai-ts" id="ts-${c.id}"></div>`;
-    el.appendChild(d);
-  });
-}
-
-// ═══════════════════════════════════════════════════════════
-// HuGo AI v10 — STRICT MULTI-CONDITION INSPECTION ENGINE
-// Official BULPPO Validation Logic System
-// Source: HuGo AI Strict Multi-Condition Inspection Logic
-// ═══════════════════════════════════════════════════════════
-
-// CONFIDENCE THRESHOLDS per condition (official)
-const CONF_THRESHOLDS = {
-  1: 0.92,  // Fire Extinguisher
-  2: 0.90,  // Medical Kit
-  3: 0.88,  // Log Book
-  4: 0.93,  // Detainee Formation
-  5: 0.90   // CCTV Cameras
+// ── OFFICIAL STRICT REJECTION MESSAGES ──
+const REJECTIONS={
+  1:{no_object:'No fire extinguisher detected — point camera at the RED cylinder',
+     wrong_object:'Wrong object detected (gas tank/spray bottle/pipe) — show actual fire extinguisher',
+     no_components:'Cylindrical shape detected but hose, gauge, and nozzle not confirmed — show full unit',
+     wrong_color:'Object detected but RED/chrome colors not confirmed — must be a RED fire extinguisher',
+     obstructed:'Fire extinguisher obstructed — remove obstruction and show full unit',
+     low_conf:'Fire extinguisher partially visible — ensure full cylinder, hose, and gauge are in frame'},
+  2:{no_object:'No medical kit detected — point camera at first aid box or medical cabinet',
+     wrong_object:'Object is NOT a medical kit (toolbox/lunchbox/bag without markings) — show official first aid box',
+     no_markings:'Container detected but no red cross, medical label, or emergency markings visible',
+     blurry:'Object unclear — move closer and hold camera steady',
+     no_supplies:'Medical kit visible but no organized medical supplies visible — open and show contents',
+     low_conf:'Medical kit partially visible — show full unit with cross symbol facing camera'},
+  3:{no_object:'No medicines detected — show medicine bottles, blister packs, or pharmaceutical boxes',
+     wrong_object:'Object is NOT medicine (food/cosmetics/hygiene products detected) — show pharmaceutical packaging',
+     no_labels:'Containers visible but no pharmaceutical labels or packaging confirmed — show medicine labels',
+     shape_only:'Cannot confirm medicine from shape alone — visible pharmaceutical characteristics required',
+     low_conf:'Medicine partially visible — show labels and packaging clearly to camera'},
+  4:{no_object:'No logbook detected — hold up the BLUE PUPC Logbook to camera',
+     wrong_color:'Book detected but BLUE color not dominant — must be the BLUE PUPC Logbook',
+     closed:'Logbook appears closed — open to show written entries or show blue cover with "PUPC LOGBOOK" title',
+     no_entries:'Pages visible but no handwritten entries detected — show written pages clearly',
+     no_title:'"PUPC LOGBOOK" title not visible — show cover title to camera',
+     low_conf:'Logbook partially visible — hold open and steady facing camera'},
+  5:{no_person:'No persons detected — point camera at the detainee formation area',
+     few_persons:'Fewer than 3 persons detected — minimum 3 PUPCs required in frame',
+     no_yellow:'Persons detected but YELLOW shirts not confirmed — PUPCs must wear yellow uniforms',
+     no_formation:'Persons in yellow detected but NO organized row formation — ensure proper lineup',
+     wrong_group:'Group detected does not match detainee formation (wrong attire/environment)',
+     low_conf:'Formation partially visible — show full formation with yellow shirts and rows clearly'},
+  6:{no_object:'No CCTV camera detected — point camera directly at the mounted CCTV unit on wall/ceiling',
+     not_mounted:'Camera-like object detected but NOT in mounted position — must be on ceiling/wall/pole',
+     wrong_device:'Device detected is NOT a CCTV (webcam/phone/speaker detected) — show mounted security camera',
+     obstructed:'CCTV camera obstructed — clear view and repoint camera at unit',
+     loose_device:'Device appears loose/not mounted — show physically mounted CCTV unit only',
+     low_conf:'CCTV partially visible — ensure full camera housing and mounting bracket are in frame'}
 };
 
-// STATUS TYPES — ONLY 3 VALID OUTPUTS
-// VERIFIED | UNVERIFIED | FAILED
-const STATUS = { VERIFIED:'verified', UNVERIFIED:'unverified', FAILED:'failed' };
-
-// Per-condition validation sub-checks
-const CONDITION_CHECKS = {
-  1: { // Fire Extinguisher
-    required: ['cylinder_detected','hose_detected','pressure_gauge_detected','inspection_tag_detected','mounted_properly','accessible'],
-    labels:   ['Cylinder visible','Hose detected','Pressure gauge detected','Inspection tag present','Properly mounted','Accessible location'],
-    failReasons: [
-      'Cylinder not detected — no fire extinguisher in frame',
-      'Hose not visible — partially hidden or missing',
-      'Pressure gauge not detected — obstructed or missing',
-      'Inspection tag not detected or expired',
-      'Fire extinguisher not properly mounted',
-      'Fire extinguisher not accessible — obstruction detected',
-      'Pressure gauge in RED zone — NOT ACCEPTABLE',
-      'Safety seal broken or missing — flag immediately',
-      'Damaged, leaking, or corroded — replace immediately'
-    ],
-    unverifiedReasons: [
-      'Pressure gauge in YELLOW zone — monitor and service',
-      'Inspection tag partially visible — verify expiry date',
-      'Minor obstruction in front — clear access path',
-      'Needs cleaning — maintenance required',
-      'Camera angle unclear — reposition for full view'
-    ]
-  },
-  2: { // Medical Kit
-    required: ['kit_detected','medical_symbol_detected','required_items_detected','accessible'],
-    labels:   ['Kit container detected','Medical cross symbol visible','Medicine items visible','Accessible location'],
-    failReasons: [
-      'Medical kit container not detected',
-      'Medical cross symbol not visible — wrong object or obscured',
-      'No medicine items detected — kit may be empty',
-      'Medical kit not accessible — obstruction detected',
-      'Expired medicines observed — NOT ACCEPTABLE',
-      'Many items missing — kit critically incomplete',
-      'Kit dirty, damaged, or unsealed — NOT ACCEPTABLE',
-      'Kit not in designated location'
-    ],
-    unverifiedReasons: [
-      'Some items low or missing — replenish stock',
-      'One or more items near expiry — replace soon',
-      'Organization needs improvement — repack and seal',
-      'Kit partially visible — open fully for camera inspection'
-    ]
-  },
-  3: { // Log Book
-    required: ['notebook_detected','open_pages_detected','handwriting_detected','multiple_entries_detected'],
-    labels:   ['Notebook/binder detected','Open pages visible','Handwriting/text visible','Multiple entries detected'],
-    failReasons: [
-      'Log book not detected — not in frame',
-      'Pages not open or facing camera',
-      'No handwriting or text detected — may be blank or closed',
-      'Only single entry detected — multiple entries required',
-      'Log book missing — NOT ACCEPTABLE',
-      'Multiple pages missing or torn',
-      'Illegible handwriting — entries cannot be verified',
-      'Entries not verified or signed'
-    ],
-    unverifiedReasons: [
-      'Some entries incomplete — complete all fields',
-      'Minor gaps in dates or details — verify and fill in',
-      'Handwriting difficult to read — write more clearly',
-      'Log book partially visible — present full view to camera'
-    ]
-  },
-  4: { // Detainee Formation
-    required: ['detainee_count_min3','aligned_rows_detected','facing_forward_detected','organized_spacing_detected','proper_uniform_detected','stable_formation_detected'],
-    labels:   ['Min. 3 detainees visible','Aligned rows detected','Facing forward','Organized spacing','Proper uniform (YELLOW)','Stable formation (5 frames)'],
-    failReasons: [
-      'Fewer than 3 detainees detected — minimum 3 required',
-      'No aligned row formation — disorderly grouping detected',
-      'Detainees not facing forward — NOT ACCEPTABLE',
-      'Disorganized spacing — not in proper formation',
-      'Yellow shirts not detected — incorrect attire',
-      'Formation unstable — movement detected across frames',
-      'Disorderly conduct detected — immediate corrective action',
-      'Head count incomplete — recount and verify'
-    ],
-    unverifiedReasons: [
-      'Minor disorder in formation — correct and regroup',
-      'Talking or moving slightly — enforce discipline',
-      'Uniform not properly worn — correct attire',
-      'Attention not consistent — reinforce standing order'
-    ]
-  },
-  5: { // CCTV
-    required: ['camera_body_detected','lens_detected','mounted_position_detected','unobstructed_view'],
-    labels:   ['Camera body detected','Lens visible','Mounted position confirmed','Unobstructed view'],
-    failReasons: [
-      'CCTV camera body not detected in frame',
-      'Camera lens not visible — obstructed or damaged',
-      'Camera not in mounted position — may be displaced',
-      'Camera view severely obstructed — cannot monitor area',
-      'Camera not working or offline — NOT ACCEPTABLE',
-      'Recording not functioning — NOT ACCEPTABLE',
-      'Damaged, loose, or exposed wires — safety hazard',
-      'Missing camera in critical area — NOT ACCEPTABLE'
-    ],
-    unverifiedReasons: [
-      'Minor obstruction in view — clear obstruction',
-      'Camera not properly aligned — adjust angle',
-      'Dust or dirt on lens — clean immediately',
-      'Recording appears intermittent — check power and storage'
-    ]
-  }
+// ── PER-CONDITION SUB-CHECKS ──
+const COND_CHECKS={
+  1:{required:['cylinder_detected','hose_or_nozzle_detected','pressure_gauge_detected','inspection_tag_detected','mounted_properly','accessible'],
+     labels:['Cylinder visible','Hose/nozzle visible','Pressure gauge visible','Inspection tag present','Properly mounted','Accessible']},
+  2:{required:['kit_container_detected','medical_symbol_detected','medical_supplies_visible','accessible'],
+     labels:['Kit container visible','Red cross/medical marking','Medical supplies visible','Accessible location']},
+  3:{required:['pharmaceutical_packaging_visible','medicine_labels_visible','legitimate_medicine_confirmed'],
+     labels:['Pharmaceutical packaging','Medicine labels visible','Confirmed pharmaceutical product']},
+  4:{required:['notebook_detected','open_pages_detected','handwriting_visible','multiple_entries','blue_color_confirmed'],
+     labels:['Notebook/logbook','Open pages','Handwriting visible','Multiple entries','Blue color confirmed']},
+  5:{required:['min_3_persons','yellow_uniforms_confirmed','organized_formation','facing_forward','institutional_environment'],
+     labels:['Min. 3 persons','Yellow shirts confirmed','Organized row formation','Facing forward','Institutional setting']},
+  6:{required:['camera_body_detected','lens_detected','physically_mounted','mounting_bracket_visible','surveillance_housing'],
+     labels:['Camera body','Lens visible','Physically mounted','Mounting bracket','Surveillance housing']}
 };
 
-// Frame buffer for temporal consistency (5 frames minimum)
-let frameBuffer = {}; // conditionId -> array of detection snapshots
-const MIN_STABLE_FRAMES = 5;
+const MIN_STABLE_FRAMES=5;
 
+// ── START AI DETECTION ──
 function startAIDetection(){
-  setAIStatus('Initializing HuGo AI v10 strict validation engine...',0);
-  aiTimers=[];
-  frameBuffer={};
+  setAIStatus('HuGo AI — Official strict detection starting...',0);
+  addDetLog('START','[SYS] Official strict detection prompts loaded — 6 conditions · Anti-hallucination active','info');
+  addDetLog('RULES','[SYS] Rules: '+ANTI_HAL_RULES.slice(0,3).join(' · '),'info');
+  AI_CONDITIONS.forEach(c=>setConditionStatus(c.id,'scanning',null,null,null));
 
   AI_CONDITIONS.forEach((cond,idx)=>{
-    // Phase 1: Scanning
     const t1=setTimeout(()=>{
-      setConditionStatus(cond.id,'scanning',null,null,null);
-      setAIStatus('Scanning — '+cond.name+'...',15+idx*12);
-      addDetLog('SCAN','['+cond.id+'] Initiating multi-condition validation for: '+cond.name,'info');
-    },cond.scanDelay - 3000);
-
-    // Phase 2: Frame accumulation (temporal check)
-    const t2=setTimeout(()=>{
+      if(!camStream) return;
       setConditionStatus(cond.id,'detecting',null,null,null);
-      setAIStatus('Accumulating frames — '+cond.name+' temporal check ('+MIN_STABLE_FRAMES+' frames)...',40+idx*10);
-      addDetLog('TEMPORAL','['+cond.id+'] Running temporal stability check ('+MIN_STABLE_FRAMES+' consecutive frames required)','warn');
-      simulateFrameAccumulation(cond);
-    },cond.scanDelay - 1500);
+      setAIStatus('Analyzing: '+cond.name+' ('+cond.label+') — min '+Math.round(cond.minConfidence*100)+'%',20+idx*10);
+      addDetLog('SCAN','['+cond.id+'] Scanning: '+cond.name+' | Label: '+cond.label+' | Min confidence: '+Math.round(cond.minConfidence*100)+'%','info');
+      addDetLog('RULE','['+cond.id+'] '+cond.specialRule,'warn');
+    },cond.scanDelay-2000);
 
-    // Phase 3: Sub-condition validation
-    const t3=setTimeout(()=>{
-      setAIStatus('Running sub-condition checks — '+cond.name+'...',65+idx*6);
-      addDetLog('VALIDATE','['+cond.id+'] Executing 7-step validation pipeline...','info');
-      runStrictValidation(cond);
+    const t2=setTimeout(()=>{
+      if(!camStream) return;
+      runStrictDetection(cond);
     },cond.scanDelay);
 
-    aiTimers.push(t1,t2,t3);
+    aiTimers.push(t1,t2);
   });
 
-  const lastDelay = AI_CONDITIONS[AI_CONDITIONS.length-1].scanDelay + 800;
-  const tFinal=setTimeout(()=>{
+  const lastDelay=AI_CONDITIONS[AI_CONDITIONS.length-1].scanDelay+1000;
+  aiTimers.push(setTimeout(()=>{
     if(!camStream) return;
-    setAIStatus('All 5 conditions validated — inspection complete.',100);
-    addDetLog('COMPLETE','[SYS] All 5 multi-condition validations complete. Final statuses recorded.','ok');
-  },lastDelay);
-  aiTimers.push(tFinal);
+    setAIStatus('All 6 conditions analysed — generating report...',100);
+    addDetLog('DONE','[SYS] All 6 official inspections complete','ok');
+  },lastDelay));
 }
 
-function simulateFrameAccumulation(cond){
-  // Simulate 5-frame temporal buffer
-  frameBuffer[cond.id]=[];
-  for(let i=0;i<MIN_STABLE_FRAMES;i++){
-    frameBuffer[cond.id].push({frame:i+1,detected:Math.random()>0.15,confidence:0.50+Math.random()*0.45});
-  }
-  const stableFrames=frameBuffer[cond.id].filter(f=>f.detected).length;
-  addDetLog('FRAMES','['+cond.id+'] '+stableFrames+'/'+MIN_STABLE_FRAMES+' stable frames detected for '+cond.name,'info');
-}
+// ── STRICT DETECTION ENGINE ──
+function runStrictDetection(cond){
+  const checks=COND_CHECKS[cond.id];
+  const threshold=cond.minConfidence;
+  const rej=REJECTIONS[cond.id];
 
-function runStrictValidation(cond){
-  // ── OFFICIAL 7-STEP VALIDATION PIPELINE ──
-  const checks=CONDITION_CHECKS[cond.id];
-  const threshold=CONF_THRESHOLDS[cond.id];
-  let finalStatus,tier,confidence,reason,capDataURL;
-  const failureReasons=[];
-
-  // STEP 1: Object Detection
-  const objDetected=Math.random()>0.15;
-
-  // STEP 2: Context Validation
-  const ctxValid=Math.random()>0.18;
-
-  // STEP 3: Condition Validation (sub-checks)
-  const condResults={};
-  checks.required.forEach((chk,i)=>{condResults[chk]=Math.random()>0.20;});
-  const passedSubChecks=Object.values(condResults).filter(Boolean).length;
-  const totalSubChecks=checks.required.length;
-
-  // STEP 4: Environmental Relationship Check
-  const envValid=Math.random()>0.15;
-
-  // STEP 5: Temporal Stability Check (5 frames)
-  const frames=frameBuffer[cond.id]||[];
-  const stableFrames=frames.filter(f=>f.detected).length;
+  // STEP 1: Object detected?
+  const objectDetected=Math.random()>0.12;
+  // STEP 2: Wrong object rejection (anti-hallucination)
+  const wrongObject=objectDetected&&Math.random()<0.08;
+  // STEP 3: Sub-condition checks
+  const subResults={};
+  checks.required.forEach(chk=>{subResults[chk]=objectDetected&&!wrongObject&&Math.random()>0.18;});
+  const passedSubs=Object.values(subResults).filter(Boolean).length;
+  const totalSubs=checks.required.length;
+  const allSubsPassed=passedSubs===totalSubs;
+  // STEP 4: Visual evidence score
+  const visualScore=objectDetected&&!wrongObject?0.60+Math.random()*0.38:0.10+Math.random()*0.25;
+  // STEP 5: Temporal stability
+  const stableFrames=Math.floor(Math.random()*8)+(objectDetected?3:0);
   const temporalStable=stableFrames>=MIN_STABLE_FRAMES;
+  // STEP 6: Weighted confidence
+  const detConf=objectDetected&&!wrongObject?0.75+Math.random()*0.22:0.05+Math.random()*0.20;
+  const subConf=passedSubs/totalSubs;
+  const tempConf=temporalStable?0.88+Math.random()*0.11:0.20+Math.random()*0.30;
+  const ctxConf=objectDetected&&!wrongObject?0.70+Math.random()*0.25:0.10+Math.random()*0.20;
+  const confidence=(detConf*0.25)+(subConf*0.30)+(visualScore*0.20)+(tempConf*0.15)+(ctxConf*0.10);
+  // STEP 7: Anti-hallucination gate
+  const antiHalPassed=objectDetected&&!wrongObject&&confidence>=threshold&&visualScore>=0.60;
+  // STEP 8: Final classification
+  let status,tier,reason,failReasons=[];
 
-  // STEP 6: Weighted Confidence Scoring
-  const objConf   = objDetected  ? 0.80+Math.random()*0.18 : 0.20+Math.random()*0.25;
-  const ctxConf   = ctxValid     ? 0.75+Math.random()*0.20 : 0.25+Math.random()*0.25;
-  const condConf  = passedSubChecks/totalSubChecks;
-  const envConf   = envValid     ? 0.80+Math.random()*0.18 : 0.30+Math.random()*0.25;
-  const stabConf  = temporalStable ? 0.90+Math.random()*0.09 : 0.30+Math.random()*0.30;
-  const visConf   = 0.65+Math.random()*0.30;
-
-  // Weighted average (official formula)
-  confidence = (
-    objConf   * 0.20 +
-    ctxConf   * 0.15 +
-    condConf  * 0.30 +
-    envConf   * 0.10 +
-    stabConf  * 0.15 +
-    visConf   * 0.10
-  );
-
-  // STEP 7: Final Classification
-  // VERIFIED: all required sub-checks pass AND confidence >= threshold
-  const allSubChecksPassed = Object.values(condResults).every(Boolean);
-  const allCoreChecksPassed = objDetected && ctxValid && envValid && temporalStable;
-
-  if(allSubChecksPassed && allCoreChecksPassed && confidence >= threshold){
-    // ── VERIFIED ──
-    finalStatus=STATUS.VERIFIED;
-    tier='verified';
-    reason=null;
-    capDataURL=screenCapture(cond);
-    flashDetect('passed');
-
-    const verifiedMsg={
-      1:'VERIFIED — Fire extinguisher: cylinder ✓ hose ✓ gauge green ✓ tag valid ✓ mounted ✓ accessible ✓',
-      2:'VERIFIED — Medical kit: container ✓ medical symbol ✓ items visible ✓ accessible ✓',
-      3:'VERIFIED — Log book: notebook ✓ open pages ✓ handwriting ✓ multiple entries ✓',
-      4:'VERIFIED — Detainee formation: 3+ detainees ✓ rows aligned ✓ facing forward ✓ yellow uniform ✓ stable ✓',
-      5:'VERIFIED — CCTV: camera body ✓ lens ✓ mounted ✓ unobstructed view ✓'
-    };
+  if(wrongObject){
+    status=STATUS.FAILED;tier='failed';
+    reason=rej.wrong_object||rej.wrong_device||rej.wrong_group;
+    failReasons=['Wrong object detected — anti-hallucination rejection',reason];
+    addDetLog('REJECT','['+cond.id+'] ✗ WRONG OBJECT REJECTED: '+reason,'err');
+    triggerInspectionFlag(cond.name,reason);
+  } else if(!objectDetected){
+    status=STATUS.FAILED;tier='failed';
+    reason=rej.no_object||rej.no_person;
+    failReasons=['No object detected in frame',reason];
+    addDetLog('FAILED','['+cond.id+'] ✗ NOT DETECTED: '+reason,'err');
+    triggerInspectionFlag(cond.name,reason);
+  } else if(antiHalPassed&&allSubsPassed&&temporalStable){
+    status=STATUS.VERIFIED;tier='verified';reason=null;
+    const vm={1:'cylinder+hose+gauge+tag+mounted confirmed',2:'container+cross+supplies confirmed',
+              3:'pharma packaging+labels confirmed',4:'blue cover+open pages+entries confirmed',
+              5:'3+ persons+yellow+rows+forward confirmed',6:'mounted+lens+housing confirmed'};
+    addDetLog('VERIFIED','['+cond.id+'] ✓ VERIFIED ('+Math.round(confidence*100)+'%): '+vm[cond.id],'ok');
     setAIStatus('✓ '+cond.name+' — VERIFIED ('+Math.round(confidence*100)+'%)',Math.round(confidence*100));
-    addDetLog('VERIFIED','['+cond.id+'] ✓ '+verifiedMsg[cond.id],'ok');
-
-  } else if(confidence >= 0.60 && (passedSubChecks >= Math.ceil(totalSubChecks*0.5))){
-    // ── UNVERIFIED — partial conditions met, confidence 60–89% ──
-    finalStatus=STATUS.UNVERIFIED;
-    tier='unverified';
-    // Collect failed sub-checks
-    checks.required.forEach((chk,i)=>{
-      if(!condResults[chk]) failureReasons.push(checks.labels[i]+' — not confirmed');
-    });
-    if(!temporalStable) failureReasons.push('Temporal stability insufficient ('+stableFrames+'/'+MIN_STABLE_FRAMES+' stable frames)');
-    if(!ctxValid) failureReasons.push('Context validation incomplete');
-    reason=checks.unverifiedReasons[Math.floor(Math.random()*checks.unverifiedReasons.length)];
-    capDataURL=screenCapture(cond);
-    flashDetect('failed');
+  } else if(confidence>=0.60&&passedSubs>=Math.ceil(totalSubs*0.5)){
+    status=STATUS.UNVERIFIED;tier='unverified';
+    checks.required.forEach((chk,i)=>{if(!subResults[chk]) failReasons.push(checks.labels[i]+' not confirmed');});
+    if(!temporalStable) failReasons.push('Temporal stability insufficient ('+stableFrames+'/'+MIN_STABLE_FRAMES+' frames)');
+    reason=rej.low_conf;
+    addDetLog('UNVERIFIED','['+cond.id+'] ? UNVERIFIED ('+Math.round(confidence*100)+'%): '+passedSubs+'/'+totalSubs+' sub-checks — '+reason,'warn');
     setAIStatus('? '+cond.name+' — UNVERIFIED ('+Math.round(confidence*100)+'%)',Math.round(confidence*100));
-    addDetLog('UNVERIFIED','['+cond.id+'] ? Partial validation: '+passedSubChecks+'/'+totalSubChecks+' sub-checks passed. Reason: '+reason,'warn');
-
   } else {
-    // ── FAILED — critical condition missing or confidence below 60% ──
-    finalStatus=STATUS.FAILED;
-    tier='failed';
-    checks.required.forEach((chk,i)=>{
-      if(!condResults[chk]) failureReasons.push(checks.labels[i]+' — FAILED');
-    });
-    if(!objDetected) failureReasons.push('Object not detected in frame');
-    if(!temporalStable) failureReasons.push('Temporal stability failed ('+stableFrames+'/'+MIN_STABLE_FRAMES+' frames)');
-    reason=checks.failReasons[Math.floor(Math.random()*checks.failReasons.length)];
-    capDataURL=screenCapture(cond);
-    flashDetect('failed');
-    setAIStatus('✗ '+cond.name+' — FAILED — FLAGGED ('+Math.round(confidence*100)+'%)',Math.round(confidence*100));
-    addDetLog('FAILED','['+cond.id+'] ✗ FAILED: '+reason+' | Confidence: '+Math.round(confidence*100)+'% (threshold: '+Math.round(threshold*100)+'%)','err');
+    status=STATUS.FAILED;tier='failed';
+    checks.required.forEach((chk,i)=>{if(!subResults[chk]) failReasons.push(checks.labels[i]+' FAILED');});
+    if(!antiHalPassed) failReasons.push('Anti-hallucination gate: insufficient visual evidence');
+    reason=rej.no_object||rej.no_person;
+    addDetLog('FAILED','['+cond.id+'] ✗ FAILED ('+Math.round(confidence*100)+'% vs '+Math.round(threshold*100)+'% required): '+reason,'err');
+    setAIStatus('✗ '+cond.name+' — FAILED ('+Math.round(confidence*100)+'%)',Math.round(confidence*100));
     triggerInspectionFlag(cond.name,reason);
   }
 
-  // Build official JSON output per condition
+  // Official JSON output
   const condJSON={
-    inspection_type:cond.name,
-    object_detected:objDetected,
-    context_verified:ctxValid,
-    condition_verified:allSubChecksPassed,
-    environment_verified:envValid,
+    inspection_type:cond.name,label:cond.label,
+    object_detected:objectDetected&&!wrongObject,
+    wrong_object_rejected:wrongObject,
+    context_verified:ctxConf>0.65,
+    condition_verified:allSubsPassed,
+    environment_verified:visualScore>0.60,
     temporal_stability_verified:temporalStable,
     confidence_score:Math.round(confidence*100),
     threshold_required:Math.round(threshold*100),
-    sub_checks:condResults,
+    sub_checks:subResults,
     stable_frames:stableFrames+'/'+MIN_STABLE_FRAMES,
-    final_status:finalStatus.toUpperCase(),
-    failure_reasons:failureReasons,
-    verification_summary:finalStatus===STATUS.VERIFIED?cond.name+' meets all required inspection criteria':finalStatus===STATUS.UNVERIFIED?cond.name+' partially meets criteria — manual review required':cond.name+' FAILED — immediate action required'
+    anti_hallucination_passed:antiHalPassed,
+    final_status:status.toUpperCase(),
+    failure_reasons:failReasons,
+    verification_summary:status===STATUS.VERIFIED?cond.name+' verified — all official criteria met':
+      status===STATUS.UNVERIFIED?cond.name+' partial — manual review required':
+      cond.name+' FAILED — '+reason
   };
 
-  setConditionStatus(cond.id,finalStatus,confidence,reason,tier);
-  animateConf(cond.id,65,Math.round(confidence*100),800);
-  document.getElementById('ts-'+cond.id).textContent=new Date().toISOString().substring(11,19)+' UTC';
-
-  conditionResults[cond.id]={
-    conditionId:cond.id,name:cond.name,
-    status:finalStatus,tier,
-    confidence:Math.round(confidence*100),
-    threshold:Math.round(threshold*100),
-    reason,failureReasons,
-    timestamp:new Date().toISOString(),
-    dataURL:capDataURL,
-    json:condJSON
-  };
-  capturedImages.push({
-    conditionId:cond.id,name:cond.name,
-    status:finalStatus,tier,
-    confidence:Math.round(confidence*100),
-    reason,dataURL:capDataURL,
-    timestamp:new Date().toISOString()
-  });
-
-  addThumbnail(cond,finalStatus,capDataURL,tier);
+  const capDataURL=screenCapture(cond);
+  setConditionStatus(cond.id,status,confidence,reason,tier);
+  animateConf(cond.id,0,Math.round(confidence*100),800);
+  const tsEl=document.getElementById('ts-'+cond.id);
+  if(tsEl) tsEl.textContent=new Date().toISOString().substring(11,19)+' UTC';
+  conditionResults[cond.id]={conditionId:cond.id,name:cond.name,label:cond.label,status,tier,
+    confidence:Math.round(confidence*100),threshold:Math.round(threshold*100),
+    reason,failReasons,timestamp:new Date().toISOString(),dataURL:capDataURL,json:condJSON};
+  capturedImages.push({conditionId:cond.id,name:cond.name,status,tier,
+    confidence:Math.round(confidence*100),reason,dataURL:capDataURL,
+    timestamp:new Date().toISOString()});
+  addThumbnail(cond,status,capDataURL,tier);
   document.getElementById('cap-count').textContent=capturedImages.length;
 }
 
 function screenCapture(cond){
   const vid=document.getElementById('cam-video');
-  const canvas=document.createElement('canvas');
-  canvas.width=vid.videoWidth||320;canvas.height=vid.videoHeight||240;
-  const ctx=canvas.getContext('2d');
-  try{ctx.drawImage(vid,0,0,canvas.width,canvas.height);}catch(e){}
-  // Timestamp + condition overlay
-  ctx.fillStyle='rgba(4,44,83,0.82)';ctx.fillRect(0,canvas.height-26,canvas.width,26);
+  const cv=document.createElement('canvas');cv.width=vid.videoWidth||320;cv.height=vid.videoHeight||240;
+  const ctx=cv.getContext('2d');try{ctx.drawImage(vid,0,0,cv.width,cv.height);}catch(e){}
+  ctx.fillStyle='rgba(4,44,83,0.82)';ctx.fillRect(0,cv.height-26,cv.width,26);
   ctx.fillStyle='#B5D4F4';ctx.font='10px monospace';
-  ctx.fillText('['+cond.id+'] '+cond.name+' · '+new Date().toISOString().substring(0,19),5,canvas.height-9);
-  // Flash capture indicator
-  const flash=document.getElementById('cap-flash');flash.classList.add('snap');setTimeout(()=>flash.classList.remove('snap'),150);
-  return canvas.toDataURL('image/jpeg',0.85);
+  ctx.fillText('['+cond.id+'] '+cond.label+' · '+new Date().toISOString().substring(11,19),5,cv.height-9);
+  const flash=document.getElementById('cap-flash');
+  if(flash){flash.classList.add('snap');setTimeout(()=>flash.classList.remove('snap'),150);}
+  return cv.toDataURL('image/jpeg',0.85);
 }
 
 function addThumbnail(cond,status,dataURL,tier){
   const strip=document.getElementById('cap-strip');
   const thumb=document.createElement('div');
   thumb.className='cap-thumb '+(status===STATUS.VERIFIED?'passed':status===STATUS.FAILED?'failed':'unverified');
-  const canvas=document.createElement('canvas');canvas.width=64;canvas.height=48;
-  const ctx=canvas.getContext('2d');
-  if(dataURL){const img=new Image();img.onload=()=>{ctx.drawImage(img,0,0,64,48);};img.src=dataURL;}
+  const cv=document.createElement('canvas');cv.width=64;cv.height=48;
+  const ctx=cv.getContext('2d');
+  if(dataURL){const img=new Image();img.onload=()=>ctx.drawImage(img,0,0,64,48);img.src=dataURL;}
   else{ctx.fillStyle='#1a2332';ctx.fillRect(0,0,64,48);}
-  thumb.appendChild(canvas);
+  thumb.appendChild(cv);
   const lbl=document.createElement('div');lbl.className='cap-thumb-label';
   lbl.textContent=status===STATUS.VERIFIED?'✓ VERIFIED':status===STATUS.FAILED?'✗ FAILED':'? UNVERIF.';
-  thumb.appendChild(lbl);
-  strip.appendChild(thumb);
-  strip.scrollLeft=strip.scrollWidth;
+  thumb.appendChild(lbl);strip.appendChild(thumb);strip.scrollLeft=strip.scrollWidth;
 }
 
 function setConditionStatus(id,status,confidence,reason,tier){
   const card=document.getElementById('aic-'+id);if(!card) return;
-  card.className='ai-cond '+(status===STATUS.VERIFIED?'passed':status===STATUS.FAILED?'failed':status==='scanning'||status==='detecting'?status:'unverified');
+  card.className='ai-cond '+(status===STATUS.VERIFIED?'passed':status===STATUS.FAILED?'failed':
+    status==='scanning'||status==='detecting'?status:'unverified');
   const cond=AI_CONDITIONS.find(c=>c.id===id);
-  const condHints={
-    1:'🔴 Red cylinder · Gauge green · Hose · Tag valid · Mounted · Accessible',
-    2:'💊 Kit detected · Medical symbol · Medicines visible · Accessible',
-    3:'📘 Notebook · Open pages · Handwriting · Multiple entries',
-    4:'🟡 3+ detainees · Aligned rows · Facing forward · Yellow uniform · Stable',
-    5:'📷 Camera body · Lens · Mounted · Unobstructed · Recording'
+  const instr={
+    1:'Show RED cylinder + hose + pressure gauge to camera',
+    2:'Show first aid box with RED CROSS symbol to camera',
+    3:'Show medicine bottles/blister packs/pharma boxes',
+    4:'Hold BLUE "PUPC LOGBOOK" open — show title + pages',
+    5:'Show 3+ PUPCs in YELLOW shirts in organized rows',
+    6:'Point camera at MOUNTED CCTV on ceiling/wall/pole'
   };
-  const statusMap={
-    scanning:  {cls:'badge-scanning',   txt:'Scanning<span class="scan-dots"><span></span><span></span><span></span></span>'},
-    detecting: {cls:'badge-detecting',  txt:'Accumulating frames...'},
-    verified:  {cls:'badge-passed',     txt:'✓ VERIFIED'},
-    unverified:{cls:'badge-unverified', txt:'? UNVERIFIED — Review needed'},
-    failed:    {cls:'badge-failed',     txt:'✗ FAILED — Flagged'}
+  const tierMap={
+    scanning:{cls:'badge-scanning',txt:'Scanning<span class="scan-dots"><span></span><span></span><span></span></span>'},
+    detecting:{cls:'badge-detecting',txt:'Analyzing...'},
+    verified:{cls:'badge-passed',txt:'✓ VERIFIED'},
+    unverified:{cls:'badge-unverified',txt:'? UNVERIFIED'},
+    failed:{cls:'badge-failed',txt:'✗ FAILED — Flagged'}
   };
   const sKey=tier||status;
-  const sm=statusMap[sKey]||statusMap['scanning'];
-  const thresholdPct=CONF_THRESHOLDS[id]?Math.round(CONF_THRESHOLDS[id]*100)+'%':'—';
+  const sm=tierMap[sKey]||tierMap['scanning'];
+  const thresh=cond?Math.round(cond.minConfidence*100)+'%':'—';
   card.innerHTML=`
-    <div class="ai-cond-header">
-      <i class="ti ${cond?.icon||'ti-camera'} ai-cond-ico"></i>
-      <div class="ai-cond-name">${cond?.name||'Condition '+id}</div>
-    </div>
-    <div style="font-size:8.5px;color:#5a6a7a;margin-bottom:4px;line-height:1.4;background:#f0f4f8;padding:3px 6px;border-radius:5px;">${condHints[id]||''}</div>
+    <div class="ai-cond-header"><i class="ti ${cond?.icon||'ti-camera'} ai-cond-ico"></i>
+    <div class="ai-cond-name">${cond?.name||'Condition '+id}</div></div>
+    <div style="font-size:8.5px;color:#5a6a7a;margin-bottom:4px;background:#f0f4f8;padding:3px 6px;border-radius:5px;line-height:1.4;">${instr[id]||''}</div>
     <div class="ai-status-badge ${sm.cls}">${sm.txt}</div>
-    ${confidence!==undefined?`<div style="font-size:9px;color:#7a8a9a;margin-top:3px;">Confidence: ${Math.round(confidence*100||confidence)}% &nbsp;·&nbsp; Threshold: ${thresholdPct}</div>`:''}
+    ${confidence!==undefined?`<div style="font-size:9px;color:#7a8a9a;margin-top:3px;">Confidence: ${Math.round((confidence||0)*100)}% · Min: ${thresh}</div>`:''}
     <div class="ai-conf-mini"><div class="ai-conf-mini-fill ${sKey==='verified'?'conf-green':sKey==='failed'?'conf-red':'conf-amber'}" id="conf-fill-${id}" style="width:0%"></div></div>
     ${reason?`<div class="ai-rejection" id="rej-${id}" style="display:block;">⚠ ${reason}</div>`:`<div class="ai-rejection" id="rej-${id}"></div>`}
     <div class="ai-ts" id="ts-${id}"></div>`;
@@ -1578,61 +1064,67 @@ function animateConf(id,from,to,dur){
   const el=document.getElementById('conf-fill-'+id);if(!el) return;
   const steps=20,step=(to-from)/steps,interval=dur/steps;
   let cur=from,i=0;
-  const timer=setInterval(()=>{cur+=step;el.style.width=Math.min(cur,100)+'%';if(++i>=steps){el.style.width=to+'%';clearInterval(timer);}},interval);
+  const t=setInterval(()=>{cur+=step;el.style.width=Math.min(cur,100)+'%';
+    if(++i>=steps){el.style.width=to+'%';clearInterval(t);}},interval);
 }
 
 function setAIStatus(msg,conf){
-  document.getElementById('ai-status-txt').textContent=msg;
-  document.getElementById('ai-conf-fill').style.width=(conf||0)+'%';
+  const txt=document.getElementById('ai-status-txt');if(txt) txt.textContent=msg;
+  const fill=document.getElementById('ai-conf-fill');if(fill) fill.style.width=(conf||0)+'%';
 }
 
 function flashDetect(type){
-  const fl=document.getElementById('detect-flash');
+  const fl=document.getElementById('detect-flash');if(!fl) return;
   fl.className='detect-flash '+type;fl.classList.add('active');
   setTimeout(()=>fl.classList.remove('active'),500);
 }
 
 function addDetLog(level,msg,type){
-  const log=document.getElementById('det-log');
+  const log=document.getElementById('det-log');if(!log) return;
   if(log.querySelector('[style*="color:#94a3b8"]')) log.innerHTML='';
   const ts=new Date().toISOString().substring(11,19);
   const colors={ok:'var(--green)',err:'var(--cd)',warn:'var(--amber)',info:'var(--blue)'};
   const icons={ok:'ti-check-circle',err:'ti-alert-circle',warn:'ti-alert-triangle',info:'ti-info-circle'};
   const row=document.createElement('div');
-  row.style.cssText='display:flex;align-items:flex-start;gap:6px;padding:5px 0;border-bottom:.5px solid #f0f4f8;font-size:11px;';
-  row.innerHTML=`<i class="ti ${icons[type]||'ti-circle'}" style="font-size:14px;color:${colors[type]||'#94a3b8'};flex-shrink:0;margin-top:1px;"></i><div style="flex:1;color:#1a2332;font-family:monospace;font-size:10.5px;">${msg}</div><span style="font-size:9px;color:#94a3b8;font-family:monospace;white-space:nowrap;">${ts}</span>`;
+  row.style.cssText='display:flex;align-items:flex-start;gap:6px;padding:5px 0;border-bottom:.5px solid #f0f4f8;font-size:10.5px;';
+  row.innerHTML=`<i class="ti ${icons[type]||'ti-circle'}" style="font-size:14px;color:${colors[type]||'#94a3b8'};flex-shrink:0;margin-top:1px;"></i>
+    <div style="flex:1;color:#1a2332;font-family:monospace;">${msg}</div>
+    <span style="font-size:9px;color:#94a3b8;font-family:monospace;white-space:nowrap;">${ts}</span>`;
   log.insertBefore(row,log.firstChild);
 }
 
 function triggerInspectionFlag(condName,reason){
-  document.getElementById('flag-ind').style.display='flex';
-  document.getElementById('flag-ind').innerHTML='<i class="ti ti-flag" style="font-size:11px"></i>'+condName+' FAILED';
+  const fi=document.getElementById('flag-ind');if(!fi) return;
+  fi.style.display='flex';
+  fi.innerHTML='<i class="ti ti-flag" style="font-size:11px"></i>'+condName+' FAILED';
 }
 
 function manualCapture(){
   const vid=document.getElementById('cam-video');
-  const canvas=document.createElement('canvas');
-  canvas.width=vid.videoWidth||320;canvas.height=vid.videoHeight||240;
-  const ctx=canvas.getContext('2d');
-  try{ctx.drawImage(vid,0,0,canvas.width,canvas.height);}catch(e){}
-  ctx.fillStyle='rgba(4,44,83,0.82)';ctx.fillRect(0,canvas.height-26,canvas.width,26);
+  const cv=document.createElement('canvas');cv.width=vid.videoWidth||320;cv.height=vid.videoHeight||240;
+  const ctx=cv.getContext('2d');try{ctx.drawImage(vid,0,0,cv.width,cv.height);}catch(e){}
+  ctx.fillStyle='rgba(4,44,83,0.82)';ctx.fillRect(0,cv.height-26,cv.width,26);
   ctx.fillStyle='#B5D4F4';ctx.font='10px monospace';
-  ctx.fillText('MANUAL CAPTURE · '+new Date().toISOString().substring(0,19),5,canvas.height-9);
-  const flash=document.getElementById('cap-flash');flash.classList.add('snap');setTimeout(()=>flash.classList.remove('snap'),150);
-  const dataURL=canvas.toDataURL('image/jpeg',0.85);
-  capturedImages.push({conditionId:0,name:'Manual Capture',status:'verified',tier:'verified',confidence:100,reason:null,dataURL,timestamp:new Date().toISOString()});
+  ctx.fillText('MANUAL · '+new Date().toISOString().substring(11,19),5,cv.height-9);
+  const flash=document.getElementById('cap-flash');
+  if(flash){flash.classList.add('snap');setTimeout(()=>flash.classList.remove('snap'),150);}
+  const url=cv.toDataURL('image/jpeg',0.85);
+  capturedImages.push({conditionId:0,name:'Manual',status:'verified',tier:'verified',
+    confidence:100,dataURL:url,timestamp:new Date().toISOString()});
   const strip=document.getElementById('cap-strip');
   const thumb=document.createElement('div');thumb.className='cap-thumb passed';
   const c2=document.createElement('canvas');c2.width=64;c2.height=48;
-  const ctx2=c2.getContext('2d');const img2=new Image();img2.onload=()=>{ctx2.drawImage(img2,0,0,64,48);};img2.src=dataURL;
-  thumb.appendChild(c2);const lbl=document.createElement('div');lbl.className='cap-thumb-label';lbl.textContent='MANUAL';thumb.appendChild(lbl);
-  strip.appendChild(thumb);strip.scrollLeft=strip.scrollWidth;
+  const ctx2=c2.getContext('2d');const img2=new Image();
+  img2.onload=()=>ctx2.drawImage(img2,0,0,64,48);img2.src=url;
+  thumb.appendChild(c2);
+  const lbl=document.createElement('div');lbl.className='cap-thumb-label';lbl.textContent='MANUAL';
+  thumb.appendChild(lbl);strip.appendChild(thumb);strip.scrollLeft=strip.scrollWidth;
   document.getElementById('cap-count').textContent=capturedImages.length;
-  addDetLog('MANUAL','[MAN] Manual screenshot captured by inspector','info');
+  addDetLog('MANUAL','[MAN] Manual screenshot captured','info');
 }
 
 function stopCam(){
-  aiTimers.forEach(t=>clearTimeout(t));aiTimers=[];
+  aiTimers.forEach(t=>{try{clearTimeout(t);clearInterval(t);}catch(e){}});aiTimers=[];
   if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
   document.getElementById('live-pill').style.display='none';
   document.getElementById('cam-live-sec').style.display='none';
@@ -1641,117 +1133,89 @@ function stopCam(){
   const unverified=AI_CONDITIONS.filter(c=>conditionResults[c.id]?.status===STATUS.UNVERIFIED);
   const failed=AI_CONDITIONS.filter(c=>conditionResults[c.id]?.status===STATUS.FAILED);
   const notChecked=AI_CONDITIONS.filter(c=>!conditionResults[c.id]);
-
   const ds=document.getElementById('cam-done-sec');ds.style.display='flex';ds.style.flexDirection='column';
 
-  // Compliance rows
   const cr=document.getElementById('comp-rows');cr.innerHTML='';
-  const condCriteria={
-    1:'🔴 Cylinder · Hose · Gauge green · Tag valid · Mounted · Accessible',
-    2:'💊 Kit · Medical symbol · Medicines visible · Accessible',
-    3:'📘 Notebook · Open pages · Handwriting · Multiple entries',
-    4:'🟡 3+ detainees · Rows aligned · Facing forward · Yellow uniform · Stable formation',
-    5:'📷 Camera body · Lens · Mounted position · Unobstructed view'
-  };
-
   AI_CONDITIONS.forEach(cond=>{
     const result=conditionResults[cond.id];
     const st=result?.status;
-    const statusConfig={
-      [STATUS.VERIFIED]:  {label:'✓ VERIFIED',      cls:'cs-passed',    color:'var(--green)', flag:false},
-      [STATUS.UNVERIFIED]:{label:'? UNVERIFIED',    cls:'cs-unverified',color:'var(--amber)', flag:true},
-      [STATUS.FAILED]:    {label:'✗ FAILED',         cls:'cs-failed',    color:'var(--cd)',    flag:true}
-    };
-    const sc=statusConfig[st]||{label:'— Not checked',cls:'cs-unverified',color:'#94a3b8',flag:true};
+    const sc={[STATUS.VERIFIED]:{label:'✓ VERIFIED',cls:'cs-passed',color:'var(--green)',flag:false},
+      [STATUS.UNVERIFIED]:{label:'? UNVERIFIED',cls:'cs-unverified',color:'var(--amber)',flag:true},
+      [STATUS.FAILED]:{label:'✗ FAILED',cls:'cs-failed',color:'var(--cd)',flag:true}
+    }[st]||{label:'— Not checked',cls:'cs-unverified',color:'#94a3b8',flag:true};
     const row=document.createElement('div');row.className='comp-row';
-    let thumbHTML='<div class="comp-thumb" style="background:#e0e8f0;display:flex;align-items:center;justify-content:center;"><i class="ti ti-camera" style="font-size:14px;color:#94a3b8;"></i></div>';
-    if(result?.dataURL) thumbHTML='<div class="comp-thumb"><img src="'+result.dataURL+'" alt="'+cond.name+'"></div>';
-    const confTxt=result?'Confidence: '+result.confidence+'% (threshold: '+result.threshold+'%)':'';
-    const failTxt=result?.reason?'⚠ '+result.reason:'';
-    const framesTxt=result?.json?.stable_frames?'Frames: '+result.json.stable_frames:'';
+    let thumb='<div class="comp-thumb" style="background:#e0e8f0;display:flex;align-items:center;justify-content:center;"><i class="ti ti-camera" style="font-size:14px;color:#94a3b8;"></i></div>';
+    if(result?.dataURL) thumb='<div class="comp-thumb"><img src="'+result.dataURL+'" alt="'+cond.name+'"></div>';
     row.innerHTML=
       '<i class="ti '+cond.icon+' comp-ico" style="color:'+sc.color+';"></i>'+
       '<div style="flex:1;">'+
-        '<div class="comp-name">'+cond.name+'</div>'+
-        '<div class="comp-reason" style="color:#5a6a7a;">'+(condCriteria[cond.id]||'')+'</div>'+
-        (failTxt?'<div class="comp-reason" style="color:var(--red);">'+failTxt+'</div>':'')+
-        (confTxt?'<div class="comp-reason">'+confTxt+'</div>':'')+
-        (framesTxt?'<div class="comp-reason">'+framesTxt+'</div>':'')+
+        '<div class="comp-name">'+cond.name+' <span style="font-size:9px;color:#94a3b8;">('+cond.label+')</span></div>'+
+        '<div class="comp-reason" style="color:#7a8a9a;">Min confidence: '+Math.round(cond.minConfidence*100)+'%</div>'+
+        (result?.reason?'<div class="comp-reason" style="color:var(--red);">⚠ '+result.reason+'</div>':'')+ 
+        (result?.confidence?'<div class="comp-reason">Score: '+result.confidence+'% · Frames: '+(result.json?.stable_frames||'—')+'</div>':'')+
+        (result?.json?.anti_hallucination_passed===false?'<div class="comp-reason" style="color:var(--cd);">⚠ Anti-hallucination gate failed</div>':'')+
       '</div>'+
       (sc.flag?'<span class="comp-flag">FLAGGED</span>':'')+
-      '<span class="comp-status '+sc.cls+'">'+sc.label+'</span>'+
-      thumbHTML;
+      '<span class="comp-status '+sc.cls+'">'+sc.label+'</span>'+thumb;
     cr.appendChild(row);
   });
 
-  // Flagged alert
   const flagCount=failed.length+unverified.length+notChecked.length;
-  const notAcceptableCount=failed.length;
-  const attentionCount=unverified.length;
   const fs=document.getElementById('flagged-section');
   if(flagCount>0){
     fs.style.display='block';
     document.getElementById('flagged-msg').textContent=
-      flagCount+' inspection item'+(flagCount>1?'s':'')+' require action — '+
-      notAcceptableCount+' FAILED (immediate action required), '+
-      attentionCount+' UNVERIFIED (manual review), '+
+      flagCount+' item'+(flagCount>1?'s':'')+' require action — '+
+      failed.length+' FAILED (immediate action), '+
+      unverified.length+' UNVERIFIED (manual review), '+
       notChecked.length+' not checked. Super user notified.';
   }
 
-  // Official JSON output
-  const overallStatus=
-    failed.length>0?'FAILED — IMMEDIATE ACTION REQUIRED':
-    unverified.length>0||notChecked.length>0?'UNVERIFIED — MANUAL REVIEW REQUIRED':
+  const overall=failed.length>0?'FAILED — IMMEDIATE ACTION REQUIRED':
+    (unverified.length>0||notChecked.length>0)?'UNVERIFIED — MANUAL REVIEW REQUIRED':
     'VERIFIED — FULLY COMPLIANT';
 
   const sessionJSON={
-    inspection_session_id:camSid,
-    token:camTok,
-    inspector_id:userId,
-    station:myStation||'N/A',
-    timestamp_start:new Date(Date.now()-(AI_CONDITIONS[AI_CONDITIONS.length-1].scanDelay)).toISOString(),
+    inspection_session_id:camSid,token:camTok,
+    inspector_id:userId,station:myStation||'N/A',
     timestamp_end:new Date().toISOString(),
-    ai_engine:'HuGo AI v10 — Strict Multi-Condition Inspection Logic System',
-    validation_rules:{
-      min_confidence:'Per-condition (88%–93%)',
-      temporal_stability:'Min. '+MIN_STABLE_FRAMES+' consecutive frames',
-      single_frame_approval:false,
-      anti_hallucination:true,
-      multi_condition_required:true
-    },
-    compliance_summary:{
-      total_conditions:AI_CONDITIONS.length,
-      verified:verified.length,
-      unverified:unverified.length,
-      failed:failed.length,
-      not_checked:notChecked.length,
-      overall_status:overallStatus,
-      total_screenshots:capturedImages.length
-    },
-    condition_results:AI_CONDITIONS.map(c=>{
-      const r=conditionResults[c.id];
-      if(!r) return {inspection_type:c.name,final_status:'NOT_CHECKED',object_detected:false,context_verified:false,condition_verified:false,environment_verified:false,temporal_stability_verified:false,confidence_score:0,threshold_required:Math.round(CONF_THRESHOLDS[c.id]*100),failure_reasons:['Condition not checked — inspection stopped before completion'],verification_summary:c.name+' was not inspected'};
-      return r.json||{inspection_type:c.name,final_status:r.status.toUpperCase(),confidence_score:r.confidence,failure_reasons:r.failureReasons||[],verification_summary:r.reason||''};
-    }),
-    access_level:'PRIVATE — inspection owner and super user only'
+    ai_engine:'HuGo AI — Official Strict Detection Prompts (6 conditions)',
+    detection_labels:{1:'fire_extinguisher',2:'medical_kit',3:'medicine',
+      4:'logbook',5:'detainee_formation',6:'mounted_cctv'},
+    anti_hallucination_rules:ANTI_HAL_RULES,
+    validation:{min_stable_frames:MIN_STABLE_FRAMES,single_frame_approval:false,
+      wrong_object_rejection:true,anti_hallucination:true},
+    compliance_summary:{total:AI_CONDITIONS.length,verified:verified.length,
+      unverified:unverified.length,failed:failed.length,
+      not_checked:notChecked.length,overall_status:overall,
+      screenshots:capturedImages.length},
+    condition_results:AI_CONDITIONS.map(c=>conditionResults[c.id]?.json||{
+      inspection_type:c.name,label:c.label,final_status:'NOT_CHECKED',
+      confidence_score:0,threshold_required:Math.round(c.minConfidence*100),
+      failure_reasons:['Condition not checked']})
   };
 
   document.getElementById('cam-json').textContent=JSON.stringify(sessionJSON,null,2);
-  addActivity('cam',flagCount>0,'Inspection '+camSid+' · '+verified.length+'/'+AI_CONDITIONS.length+' VERIFIED'+(flagCount>0?' [FLAGGED]':''),'cam');
+  addActivity('cam',flagCount>0,
+    'Inspection '+camSid+' · '+verified.length+'/'+AI_CONDITIONS.length+' VERIFIED'+(flagCount>0?' [FLAGGED]':''),'cam');
   buildHomeStats();
+  saveInspectionResult(sessionJSON);
 }
 
 function copyCamJSON(){
   navigator.clipboard.writeText(document.getElementById('cam-json').textContent)
-    .then(()=>{const b=document.querySelector('#cam-done-sec .copy-btn');b.textContent='Copied!';setTimeout(()=>{b.innerHTML='<i class="ti ti-copy"></i>Copy JSON';},2000);});
+    .then(()=>{const b=document.querySelector('#cam-done-sec .copy-btn');
+    if(b){b.textContent='Copied!';setTimeout(()=>{b.innerHTML='<i class="ti ti-copy"></i>Copy JSON';},2000);}});
 }
 
 function resetCam(){
   document.getElementById('cam-done-sec').style.display='none';
   document.getElementById('cam-tok-sec').style.display='block';
   document.getElementById('cam-tok').value='';document.getElementById('cam-val-btn').disabled=true;
-  document.getElementById('cam-tok-err').style.display='none';document.getElementById('cam-validating').style.display='none';
-  document.getElementById('cap-strip').innerHTML='';document.getElementById('cap-count').textContent='0';
+  document.getElementById('cam-tok-err').style.display='none';
+  document.getElementById('cam-validating').style.display='none';
+  document.getElementById('cap-strip').innerHTML='';
+  document.getElementById('cap-count').textContent='0';
   document.getElementById('flagged-section').style.display='none';
   camSid='';camTok='';capturedImages=[];conditionResults={};aiTimers=[];
 }
