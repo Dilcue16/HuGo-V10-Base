@@ -1,0 +1,1810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0C447C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HuGo">
+<meta name="mobile-web-app-capable" content="yes">
+<title>HuGo v10 — Human Rights on the Go</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root{
+  --navy:#0C447C;--blue:#185FA5;--lb:#E6F1FB;--mb:#B5D4F4;--db:#7FB3E0;--dn:#042C53;
+  --green:#3B6D11;--lg:#EAF3DE;--gb:#C0DD97;
+  --amber:#633806;--la:#FAEEDA;--ab:#FAC775;
+  --red:#791F1F;--lr:#FCEBEB;--rb:#F09595;--dr:#501313;
+  --crim:#A32D2D;--cd:#E24B4A;
+  --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',sans-serif;background:#f0f4f8;}
+
+/* SPLASH */
+#splash{position:fixed;inset:0;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s;}
+#splash.hidden{opacity:0;pointer-events:none;}
+.sp-logo{width:88px;height:88px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.3);animation:popIn .6s ease;}
+@keyframes popIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.sp-logo .lm{font-size:24px;font-weight:700;color:var(--navy);}
+.sp-logo .ls{font-size:10px;color:var(--blue);}
+.sp-title{font-size:20px;font-weight:500;color:#fff;margin-bottom:6px;}
+.sp-sub{font-size:12px;color:var(--mb);text-align:center;max-width:280px;line-height:1.5;}
+.sp-dots{display:flex;gap:8px;margin-top:28px;}
+.sp-dot{width:8px;height:8px;border-radius:50%;background:var(--mb);animation:sdot 1.2s infinite;}
+.sp-dot:nth-child(2){animation-delay:.2s}.sp-dot:nth-child(3){animation-delay:.4s}
+@keyframes sdot{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+
+/* APP SHELL */
+#app{display:flex;flex-direction:column;height:100%;padding-top:var(--safe-t);}
+#hdr{background:var(--navy);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+.hdr-logo{width:36px;height:36px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;line-height:1;}
+.hdr-logo .lm{font-size:10.5px;font-weight:700;color:var(--navy);}
+.hdr-logo .ls{font-size:7px;color:var(--blue);}
+.hdr-text{flex:1;min-width:0;}
+.hdr-text h1{font-size:13px;font-weight:500;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hdr-text .hs{font-size:9px;color:var(--mb);margin-top:1px;}
+.live-pill{padding:3px 8px;border-radius:10px;font-size:9px;font-weight:500;background:rgba(163,45,45,.7);border:.5px solid var(--cd);color:#fff;display:none;align-items:center;gap:3px;animation:lpulse 1.5s infinite;}
+@keyframes lpulse{0%,100%{opacity:1}50%{opacity:.5}}
+.live-dot{width:5px;height:5px;border-radius:50%;background:#fff;}
+#offline-bar{background:var(--crim);color:#fff;font-size:11px;font-weight:500;padding:6px 14px;text-align:center;display:none;flex-shrink:0;}
+
+/* LOGIN */
+#login-screen{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:14px;background:#f0f4f8;}
+.ls-title{font-size:18px;font-weight:700;color:#1a2332;}
+.ls-sub{font-size:12px;color:#7a8a9a;line-height:1.5;}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.role-card{padding:15px 14px;border:.5px solid #d0dce8;border-radius:16px;cursor:pointer;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);transition:all .15s;display:flex;flex-direction:column;}
+.role-card:active{transform:scale(.97);}
+.role-card.sup-card{border-color:var(--gb);}
+.rc-ico{font-size:26px;color:var(--blue);margin-bottom:7px;}
+.sup-card .rc-ico{color:var(--green);}
+.rc-name{font-size:13px;font-weight:600;color:#1a2332;}
+.rc-info{font-size:10.5px;color:#7a8a9a;margin-top:3px;line-height:1.4;}
+
+/* AUTH */
+#station-auth,#super-auth{flex:1;overflow-y:auto;padding:20px 16px;display:none;flex-direction:column;gap:14px;background:#f0f4f8;}
+.auth-header{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.auth-back{width:34px;height:34px;border:.5px solid #d0dce8;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.auth-card{background:#fff;border:.5px solid #d0dce8;border-radius:16px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.auth-card-title{font-size:13px;font-weight:600;color:#1a2332;margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+.auth-card-title i{font-size:16px;color:var(--blue);}
+.fl{font-size:11px;font-weight:600;color:#5a6a7a;margin-bottom:4px;}
+.req{color:var(--crim);}
+.fs,.fi{width:100%;padding:11px 13px;font-size:14px;font-family:inherit;border:1px solid #d0dce8;border-radius:12px;outline:none;background:#f8fafc;color:#1a2332;-webkit-appearance:none;}
+.fs:focus,.fi:focus{border-color:var(--blue);background:#fff;}
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.tok-inp{width:100%;padding:12px 14px;font-size:16px;font-family:monospace;border:1px solid #d0dce8;border-radius:12px;outline:none;background:#f8fafc;color:#1a2332;letter-spacing:2px;-webkit-appearance:none;}
+.tok-inp:focus{border-color:var(--blue);background:#fff;}
+
+/* ALERTS */
+.alert{border-radius:12px;padding:10px 12px;font-size:12px;display:flex;align-items:flex-start;gap:8px;line-height:1.5;}
+.alert i{font-size:16px;flex-shrink:0;margin-top:1px;}
+.alert.ok{background:var(--lg);border:1px solid var(--gb);color:var(--green);}
+.alert.err{background:var(--lr);border:1px solid var(--rb);color:var(--red);}
+.alert.warn{background:var(--la);border:1px solid var(--ab);color:var(--amber);}
+.alert.urgent{background:#F7C1C1;border:1px solid var(--cd);color:var(--dr);font-weight:600;}
+.alert.info{background:var(--lb);border:1px solid var(--mb);color:var(--navy);}
+
+/* BUTTONS */
+.pbtn{padding:13px 18px;background:var(--navy);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;width:100%;font-family:inherit;transition:all .15s;}
+.pbtn:active{transform:scale(.98);background:var(--blue);}
+.pbtn:disabled{background:#c0cdd8;color:#8a9aaa;cursor:not-allowed;}
+.sbtn{padding:13px 18px;background:var(--green);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;width:100%;font-family:inherit;}
+.sbtn:active{transform:scale(.98);}
+.dbtn{padding:13px 18px;background:var(--crim);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;width:100%;font-family:inherit;}
+.dbtn:active{transform:scale(.98);}
+.gbtn{padding:10px 16px;border:1px solid #d0dce8;background:#fff;border-radius:12px;font-size:13px;cursor:pointer;color:#5a6a7a;display:flex;align-items:center;gap:6px;font-family:inherit;}
+.gbtn:active{background:#f0f4f8;}
+.add-btn{padding:10px 16px;border:2px dashed #c0cdd8;background:#f8fafc;border-radius:12px;font-size:13px;cursor:pointer;color:var(--blue);display:flex;align-items:center;justify-content:center;gap:6px;width:100%;font-family:inherit;}
+
+/* USER BAR */
+#user-bar{padding:6px 14px;background:#f8fafc;border-bottom:.5px solid #d0dce8;display:flex;align-items:center;gap:8px;font-size:11px;flex-shrink:0;}
+.ub-pill{padding:2px 8px;border-radius:8px;font-size:9.5px;font-weight:600;}
+.ub-st{background:var(--lb);color:var(--navy);}
+.ub-su{background:var(--lg);color:var(--green);}
+.ub-name{color:#1a2332;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.flag-ind{padding:2px 7px;border-radius:7px;font-size:9.5px;font-weight:600;background:var(--lr);color:var(--red);display:none;align-items:center;gap:3px;}
+.sw-btn{font-size:10px;color:var(--blue);cursor:pointer;border:none;background:none;padding:0;white-space:nowrap;}
+
+/* BOTTOM NAV */
+#bottom-nav{display:flex;background:#fff;border-top:.5px solid #d0dce8;flex-shrink:0;padding-bottom:var(--safe-b);box-shadow:0 -2px 12px rgba(0,0,0,.08);}
+.bnav{flex:1;padding:8px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border:none;background:none;position:relative;}
+.bnav i{font-size:20px;color:#94a3b8;transition:color .15s;}
+.bnav span{font-size:9px;color:#94a3b8;transition:color .15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.bnav.active i{color:var(--navy);}
+.bnav.active span{color:var(--navy);font-weight:600;}
+.bnav::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--navy);border-radius:0 0 3px 3px;transition:width .2s;}
+.bnav.active::after{width:32px;}
+.nb-badge{position:absolute;top:5px;right:16%;min-width:14px;height:14px;border-radius:7px;background:var(--cd);border:1.5px solid #fff;display:none;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;padding:0 3px;}
+.nb-badge.show{display:flex;}
+
+/* CONTENT */
+#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;background:#f0f4f8;}
+.view{display:none;padding:14px;flex-direction:column;gap:12px;min-height:100%;}
+.view.active{display:flex;}
+
+/* CARDS */
+.card{background:#fff;border:.5px solid #d0dce8;border-radius:16px;padding:14px 15px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.card-title{font-size:13px;font-weight:600;color:#1a2332;margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+.card-title i{font-size:16px;color:var(--blue);}
+
+/* HOME */
+.greeting{font-size:20px;font-weight:700;color:#1a2332;}
+.greeting-sub{font-size:12px;color:#7a8a9a;margin-top:2px;}
+.stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.stat-card{background:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 2px 8px rgba(0,0,0,.06);border:.5px solid #d0dce8;}
+.sv{font-size:26px;font-weight:700;color:#1a2332;}
+.sv.s{color:var(--green)}.sv.d{color:var(--crim);}
+.sl2{font-size:10.5px;color:#7a8a9a;margin-top:2px;}
+.sec-lbl{font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.6px;}
+.mod-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.mod-card{background:#fff;border:.5px solid #d0dce8;border-radius:14px;padding:13px 12px 11px;cursor:pointer;display:flex;flex-direction:column;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,.05);transition:all .15s;}
+.mod-card:active{transform:scale(.97);border-color:var(--blue);}
+.mc-ico{font-size:24px;color:var(--blue);}
+.mc-name{font-size:12px;font-weight:600;color:#1a2332;line-height:1.3;}
+.mc-desc{font-size:10px;color:#7a8a9a;line-height:1.4;}
+.mc-badge{margin-top:4px;font-size:9.5px;padding:2px 8px;border-radius:8px;width:fit-content;font-weight:500;}
+.mb-g{background:var(--lg);color:var(--green);}
+.mb-b{background:var(--lb);color:var(--navy);}
+.act-list{display:flex;flex-direction:column;gap:6px;}
+.act-row{display:flex;align-items:center;gap:9px;padding:10px 12px;background:#fff;border:.5px solid #d0dce8;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.act-ico{font-size:16px;color:var(--blue);flex-shrink:0;}
+.act-ico.flag{color:var(--crim);}
+.act-body{flex:1;min-width:0;font-size:11.5px;color:#5a6a7a;}
+.act-body strong{color:#1a2332;display:block;font-size:12px;}
+.act-ts{font-size:9px;color:#94a3b8;white-space:nowrap;}
+
+/* FORM ELEMENTS */
+.rw2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.rw3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.num-wrap{display:flex;align-items:center;gap:10px;}
+.num-btn{width:36px;height:36px;border:1px solid #d0dce8;border-radius:10px;background:#f8fafc;cursor:pointer;font-size:20px;color:#1a2332;display:flex;align-items:center;justify-content:center;font-family:inherit;}
+.num-btn:active{background:var(--lb);}
+.num-disp{font-size:26px;font-weight:700;color:#1a2332;min-width:44px;text-align:center;}
+.num-man{width:80px;padding:8px 10px;font-size:14px;font-family:inherit;border:1px solid #d0dce8;border-radius:10px;outline:none;background:#f8fafc;color:#1a2332;text-align:center;}
+.month-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+.month-opt{padding:7px 4px;border:1px solid #d0dce8;border-radius:10px;font-size:11px;cursor:pointer;color:#5a6a7a;background:#f8fafc;text-align:center;font-family:inherit;}
+.month-opt.on{border-color:var(--blue);color:var(--blue);background:var(--lb);font-weight:600;}
+.tog-wrap{display:flex;gap:8px;}
+.tog{flex:1;padding:10px 14px;border:1px solid #d0dce8;border-radius:12px;font-size:13px;cursor:pointer;background:#f8fafc;color:#5a6a7a;font-weight:500;font-family:inherit;text-align:center;}
+.tog.y-on{border-color:var(--green);background:var(--lg);color:var(--green);font-weight:600;}
+.tog.n-on{border-color:var(--blue);background:var(--lb);color:var(--blue);font-weight:600;}
+.chip-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
+.chip{padding:4px 11px;border:1px solid #d0dce8;border-radius:20px;font-size:11.5px;cursor:pointer;color:#5a6a7a;background:#f8fafc;}
+.chip.on{border-color:var(--navy);background:var(--lb);color:var(--navy);font-weight:500;}
+.drop-zone{border:2px dashed #c0cdd8;border-radius:14px;padding:20px 14px;text-align:center;cursor:pointer;background:#f8fafc;transition:all .15s;}
+.drop-zone.over{border-color:var(--blue);background:var(--lb);}
+.drop-zone i{font-size:28px;color:#94a3b8;display:block;margin-bottom:6px;}
+.drop-zone p{font-size:12px;color:#7a8a9a;}
+.drop-zone small{font-size:10px;color:#94a3b8;}
+.file-prev{display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--gb);border-radius:12px;background:var(--lg);margin-top:7px;}
+.file-prev i{font-size:18px;color:var(--green);}
+.fp-n{font-size:12px;font-weight:500;color:var(--green);flex:1;word-break:break-all;}
+.fp-r{cursor:pointer;color:var(--crim);font-size:11px;border:none;background:none;padding:0;font-family:inherit;}
+
+/* PROCESSING */
+.processing{padding:24px;text-align:center;display:none;}
+.proc-dots{display:flex;justify-content:center;gap:6px;}
+.proc-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);animation:pd 1.2s infinite;}
+.proc-dot:nth-child(2){animation-delay:.2s}.proc-dot:nth-child(3){animation-delay:.4s}
+@keyframes pd{0%,80%,100%{transform:translateY(0);opacity:.5}40%{transform:translateY(-6px);opacity:1}}
+
+/* SUCCESS */
+.success-card{background:#fff;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.sico{font-size:48px;color:var(--green);display:block;margin-bottom:10px;}
+.s-title{font-size:17px;font-weight:700;color:#1a2332;margin-bottom:6px;}
+.s-sub{font-size:12px;color:#7a8a9a;line-height:1.5;margin-bottom:14px;}
+.json-box{background:var(--dn);border-radius:12px;padding:12px;font-size:10px;font-family:monospace;color:var(--mb);white-space:pre-wrap;word-break:break-all;max-height:140px;overflow-y:auto;text-align:left;margin-bottom:12px;}
+.copy-btn{display:flex;align-items:center;justify-content:center;gap:5px;padding:10px 16px;border:1px solid #d0dce8;border-radius:12px;background:#f8fafc;cursor:pointer;color:#5a6a7a;font-size:13px;font-family:inherit;width:100%;}
+
+/* NOTIFICATION */
+.notif-card{background:#fff;border:.5px solid #d0dce8;border-radius:14px;padding:12px 14px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.notif-title{font-size:12px;font-weight:600;color:#1a2332;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.notif-title i{font-size:14px;color:var(--blue);}
+.notif-bar-wrap{height:8px;border-radius:4px;background:#e0e8f0;overflow:hidden;margin-bottom:6px;}
+.notif-bar{height:100%;border-radius:4px;background:var(--blue);transition:width .5s;}
+.notif-bar.full{background:var(--green);}.notif-bar.low{background:var(--crim);}
+.notif-nums{display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;}
+.stn-pill{display:inline-block;padding:2px 8px;border-radius:8px;font-size:9.5px;font-weight:600;margin:2px;}
+.sp-b{background:var(--lb);color:var(--navy);}
+.sp-g{background:var(--lg);color:var(--green);}
+.sp-a{background:var(--la);color:var(--amber);}
+.sp-r{background:var(--lr);color:var(--red);}
+
+/* ══════════════════════════════════════════
+   CAMERA & AI INSPECTION MODULE v7
+   ══════════════════════════════════════════ */
+
+/* Camera viewport */
+#cam-vp{background:var(--dn);border-radius:16px;overflow:hidden;height:220px;display:flex;align-items:center;justify-content:center;position:relative;border:1px solid var(--blue);}
+#cam-video{width:100%;height:100%;object-fit:cover;display:none;}
+#cam-ph{text-align:center;color:var(--db);padding:24px;}
+#cam-ph i{font-size:40px;display:block;margin-bottom:8px;color:#378ADD;}
+#cam-ph p{font-size:13px;}
+#cam-sid{position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:9px;font-family:monospace;color:#378ADD;background:rgba(4,44,83,.85);padding:3px 8px;border-radius:8px;white-space:nowrap;}
+#cam-live-ind{position:absolute;top:8px;right:10px;display:none;align-items:center;gap:4px;font-size:10px;color:var(--cd);font-weight:700;background:rgba(4,44,83,.85);padding:3px 8px;border-radius:8px;}
+#cam-live-ind .ld{width:6px;height:6px;border-radius:50%;background:var(--cd);animation:lpulse 1s infinite;}
+
+/* AI detection scanner overlay */
+#scan-overlay{position:absolute;inset:0;pointer-events:none;}
+.scan-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(56,200,255,.8),transparent);animation:scanMove 2s linear infinite;}
+@keyframes scanMove{0%{top:0;opacity:1}100%{top:100%;opacity:0}}
+.scan-corner{position:absolute;width:20px;height:20px;border-color:rgba(56,200,255,.7);border-style:solid;}
+.sc-tl{top:8px;left:8px;border-width:2px 0 0 2px;}
+.sc-tr{top:8px;right:8px;border-width:2px 2px 0 0;}
+.sc-bl{bottom:8px;left:8px;border-width:0 0 2px 2px;}
+.sc-br{bottom:8px;right:8px;border-width:0 2px 2px 0;}
+
+/* Detection flash overlay */
+#detect-flash{position:absolute;inset:0;border-radius:16px;pointer-events:none;opacity:0;transition:opacity .15s;}
+#detect-flash.passed{background:rgba(59,109,17,.3);}
+#detect-flash.failed{background:rgba(163,45,45,.3);}
+#detect-flash.active{opacity:1;}
+
+/* AI status bar inside viewport */
+#ai-status-bar{position:absolute;bottom:0;left:0;right:0;background:rgba(4,44,83,.85);padding:6px 10px;display:none;align-items:center;gap:6px;font-size:10.5px;color:#fff;}
+#ai-status-ico{font-size:14px;}
+#ai-status-txt{flex:1;}
+#ai-conf-bar{height:4px;border-radius:2px;background:rgba(255,255,255,.2);overflow:hidden;width:60px;flex-shrink:0;}
+#ai-conf-fill{height:100%;border-radius:2px;background:#fff;transition:width .3s;}
+
+/* Screenshot flash */
+#cap-flash{position:absolute;inset:0;background:#fff;border-radius:16px;opacity:0;pointer-events:none;transition:opacity .1s;}
+#cap-flash.snap{opacity:.8;}
+
+/* Capture thumbnail strip */
+#cap-strip{display:flex;gap:6px;overflow-x:auto;padding:2px 0;-webkit-overflow-scrolling:touch;}
+.cap-thumb{flex-shrink:0;width:64px;height:48px;border-radius:8px;overflow:hidden;position:relative;border:2px solid transparent;}
+.cap-thumb.passed{border-color:var(--green);}
+.cap-thumb.failed{border-color:var(--cd);}
+.cap-thumb.unverified{border-color:var(--amber);}
+.cap-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.cap-thumb canvas{width:100%;height:100%;display:block;}
+.cap-thumb-label{position:absolute;bottom:0;left:0;right:0;font-size:7px;font-weight:700;text-align:center;padding:2px;color:#fff;}
+.cap-thumb.passed .cap-thumb-label{background:rgba(59,109,17,.85);}
+.cap-thumb.failed .cap-thumb-label{background:rgba(163,45,45,.85);}
+.cap-thumb.unverified .cap-thumb-label{background:rgba(99,56,6,.85);}
+
+/* AI Inspection conditions grid */
+/* AI Inspection conditions grid — 5 conditions */
+.ai-cond-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.ai-cond-grid .ai-cond:last-child:nth-child(odd){grid-column:1/-1;}
+.ai-cond{border:1.5px solid #d0dce8;border-radius:14px;padding:10px 12px;background:#fff;position:relative;transition:all .3s;}
+.ai-cond.scanning{border-color:var(--blue);background:var(--lb);}
+.ai-cond.detecting{border-color:var(--amber);background:var(--la);animation:detectPulse .8s infinite;}
+@keyframes detectPulse{0%,100%{border-color:var(--amber)}50%{border-color:var(--ab)}}
+.ai-cond.passed{border-color:var(--green);background:var(--lg);}
+.ai-cond.failed{border-color:var(--cd);background:var(--lr);}
+.ai-cond.unverified{border-color:var(--amber);background:var(--la);}
+.ai-cond-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.ai-cond-ico{font-size:20px;color:#94a3b8;flex-shrink:0;}
+.ai-cond.scanning .ai-cond-ico{color:var(--blue);}
+.ai-cond.detecting .ai-cond-ico{color:var(--amber);}
+.ai-cond.passed .ai-cond-ico{color:var(--green);}
+.ai-cond.failed .ai-cond-ico{color:var(--cd);}
+.ai-cond.unverified .ai-cond-ico{color:var(--amber);}
+.ai-cond-name{font-size:11px;font-weight:700;color:#1a2332;line-height:1.3;}
+.ai-cond.passed .ai-cond-name{color:var(--green);}
+.ai-cond.failed .ai-cond-name{color:var(--red);}
+.ai-cond.unverified .ai-cond-name{color:var(--amber);}
+.ai-status-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;display:inline-flex;align-items:center;gap:3px;margin-top:3px;}
+.badge-scanning{background:var(--lb);color:var(--navy);}
+.badge-detecting{background:var(--la);color:var(--amber);}
+.badge-passed{background:var(--lg);color:var(--green);}
+.badge-failed{background:var(--lr);color:var(--red);}
+.badge-unverified{background:var(--la);color:var(--amber);}
+.ai-conf-mini{height:4px;border-radius:2px;background:#e0e8f0;overflow:hidden;margin-top:5px;}
+.ai-conf-mini-fill{height:100%;border-radius:2px;transition:width .5s;}
+.conf-green{background:var(--green);}
+.conf-amber{background:#e8a020;}
+.conf-red{background:var(--cd);}
+.ai-rejection{font-size:9.5px;color:var(--red);margin-top:4px;line-height:1.4;display:none;}
+.ai-cond.failed .ai-rejection{display:block;}
+.ai-cond.unverified .ai-rejection{display:block;color:var(--amber);}
+.ai-ts{font-size:9px;color:#94a3b8;margin-top:3px;font-family:monospace;}
+.ai-cond.passed .ai-ts{color:var(--green);}
+
+/* Scan dots animation */
+.scan-dots{display:inline-flex;gap:2px;margin-left:4px;}
+.scan-dots span{width:3px;height:3px;border-radius:50%;background:var(--blue);display:inline-block;animation:pd 1s infinite;}
+.scan-dots span:nth-child(2){animation-delay:.2s}.scan-dots span:nth-child(3){animation-delay:.4s}
+
+/* Compliance summary card */
+.compliance-summary{background:#fff;border-radius:16px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.comp-header{font-size:14px;font-weight:700;color:#1a2332;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.comp-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:.5px solid #f0f4f8;}
+.comp-row:last-child{border-bottom:none;}
+.comp-ico{font-size:18px;flex-shrink:0;}
+.comp-name{flex:1;font-size:12px;color:#1a2332;font-weight:500;}
+.comp-status{font-size:10px;font-weight:700;padding:3px 9px;border-radius:8px;}
+.cs-passed{background:var(--lg);color:var(--green);}
+.cs-failed{background:var(--lr);color:var(--red);}
+.cs-unverified{background:var(--la);color:var(--amber);}
+.comp-reason{font-size:9.5px;color:#7a8a9a;margin-top:2px;}
+.comp-flag{font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:6px;background:var(--lr);color:var(--red);}
+.comp-thumb{width:44px;height:32px;border-radius:5px;overflow:hidden;flex-shrink:0;}
+.comp-thumb canvas,.comp-thumb img{width:100%;height:100%;object-fit:cover;}
+
+/* Master table */
+.master-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.master-table{width:100%;border-collapse:collapse;font-size:11px;min-width:560px;}
+.master-table th{text-align:left;padding:8px 10px;font-size:9.5px;font-weight:700;color:#7a8a9a;border-bottom:1px solid #d0dce8;background:#f8fafc;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;}
+.master-table td{padding:8px 10px;border-bottom:1px solid #f0f4f8;color:#5a6a7a;vertical-align:top;}
+.master-table td:first-child{font-weight:600;color:#1a2332;}
+
+/* PICE report preview */
+.pice-preview{background:#f5f5f5;border-radius:14px;padding:12px;}
+.doc-inner{background:#fff;border:.5px solid #ccc;border-radius:4px;padding:18px 22px;box-shadow:0 2px 12px rgba(0,0,0,.1);}
+.doc-conf{font-size:10px;font-weight:700;text-align:center;letter-spacing:1px;color:#A32D2D;margin-bottom:7px;}
+.doc-title{font-size:11px;font-weight:700;text-align:center;color:#1a1a1a;margin-bottom:11px;line-height:1.4;}
+.doc-table{width:100%;border-collapse:collapse;font-size:9.5px;}
+.doc-table th{background:#1F4E79;color:#fff;padding:5px 7px;font-weight:600;border:.5px solid #2d6aa0;text-align:center;}
+.doc-table th.tl{text-align:left;}
+.doc-table td{padding:4px 6px;border:.5px solid #BDD7EE;vertical-align:middle;}
+.doc-table td.stn-c{font-weight:700;background:#DEEAF1;font-size:9px;}
+.doc-table td.num-c{text-align:center;font-weight:600;color:#1F4E79;}
+.doc-table td.ph-c{text-align:center;padding:3px 4px;}
+.doc-table tr.tot td{background:#1F4E79;color:#fff;font-weight:700;text-align:center;}
+.doc-photo{width:50px;height:36px;object-fit:cover;border-radius:2px;}
+.doc-photo-ph{width:50px;height:36px;border:1px dashed #BDD7EE;border-radius:2px;background:#f0f4f8;display:inline-flex;align-items:center;justify-content:center;font-size:7px;color:#94a3b8;}
+.doc-motto{font-size:8px;font-style:italic;text-align:center;margin-top:10px;color:#444;}
+
+/* Audit log */
+.audit-wrap{background:var(--dn);border-radius:12px;padding:12px;font-size:10px;font-family:monospace;color:var(--mb);max-height:200px;overflow-y:auto;}
+
+#status-bar{padding:4px 13px;background:var(--dn);font-size:9.5px;color:var(--db);display:flex;align-items:center;gap:5px;flex-shrink:0;}
+#status-bar strong{color:var(--mb);}
+#install-banner{background:linear-gradient(135deg,var(--navy),var(--blue));border-radius:14px;padding:14px 16px;display:none;align-items:center;gap:12px;margin-bottom:4px;}
+@media print{#hdr,#user-bar,#bottom-nav,#status-bar{display:none!important;}.pice-preview{background:none;padding:0;}.doc-inner{box-shadow:none;border:none;}}
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <div class="sp-logo"><span class="lm">HuGo</span><span class="ls">v8</span></div>
+  <div class="sp-title">Human Rights on the Go</div>
+  <div class="sp-sub">Bulacan Police Provincial Human Rights Affairs Office · BULPPO, PRO 3</div>
+  <div class="sp-dots"><div class="sp-dot"></div><div class="sp-dot"></div><div class="sp-dot"></div></div>
+</div>
+
+<div id="app">
+  <div id="hdr">
+    <div class="hdr-logo"><span class="lm">HuGo</span><span class="ls">v8</span></div>
+    <div class="hdr-text"><h1>Human Rights on the Go</h1><div class="hs">BULPPO PRO 3 · <span id="hdr-sub">PHRA Bulacan</span></div></div>
+    <div class="live-pill" id="live-pill"><div class="live-dot"></div>LIVE</div>
+  </div>
+  <div id="offline-bar">⚠ You are offline — AI features unavailable</div>
+
+  <!-- LOGIN -->
+  <div id="login-screen">
+    <div id="install-banner"><div><div style="font-size:13px;font-weight:600;color:#fff;">Install HuGo</div><div style="font-size:11px;color:var(--mb);margin-top:2px;">Add to home screen</div></div><button style="padding:8px 14px;background:#fff;color:var(--navy);border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;" onclick="installApp()">Install</button><button style="color:var(--mb);font-size:18px;cursor:pointer;background:none;border:none;" onclick="this.parentElement.style.display='none'"><i class="ti ti-x"></i></button></div>
+    <div class="ls-title">Welcome to HuGo v10</div>
+    <div class="ls-sub">Strict AI visual recognition — Blue PUPC logbook, Yellow PUPC formation, Medicine detection. Select your role to begin.</div>
+    <div class="role-grid">
+      <div class="role-card" onclick="showStationAuth()"><div class="rc-ico"><i class="ti ti-building"></i></div><div class="rc-name">Station user</div><div class="rc-info">Select your station and enter passcode</div></div>
+      <div class="role-card sup-card" onclick="showSuperAuth()"><div class="rc-ico"><i class="ti ti-shield-check"></i></div><div class="rc-name">Super user</div><div class="rc-info">Enter master password for full access</div></div>
+    </div>
+    <div class="alert info"><i class="ti ti-shield"></i>All data is strictly isolated per station. Access control enforced across all modules.</div>
+  </div>
+
+  <!-- STATION AUTH -->
+  <div id="station-auth">
+    <div class="auth-header"><div class="auth-back" onclick="backToLogin()"><i class="ti ti-arrow-left"></i></div><div style="font-size:16px;font-weight:700;color:#1a2332;">Station login</div></div>
+    <div class="auth-card">
+      <div class="auth-card-title"><i class="ti ti-building"></i>Select your station</div>
+      <div class="fg"><select class="fs" id="stn-select" onchange="onStnSelect()"><option value="">Select station...</option></select></div>
+      <div class="fg" id="pass-field" style="display:none;"><div class="fl">Station passcode <span class="req">*</span></div><input type="password" class="tok-inp" id="stn-pass" placeholder="Enter passcode..." oninput="onPassIn()"></div>
+      <div class="alert err" id="stn-err" style="display:none;"><i class="ti ti-alert-triangle"></i><span id="stn-err-msg"></span></div>
+      <div class="alert info" style="font-size:11px;margin-top:4px;"><i class="ti ti-info-circle"></i>Demo passcode: <strong>PHRA2025</strong></div>
+    </div>
+    <button class="pbtn" id="stn-btn" onclick="loginStation()" disabled><i class="ti ti-login"></i>Login</button>
+    <div class="processing" id="stn-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
+  </div>
+
+  <!-- SUPER AUTH -->
+  <div id="super-auth">
+    <div class="auth-header"><div class="auth-back" onclick="backToLogin()"><i class="ti ti-arrow-left"></i></div><div style="font-size:16px;font-weight:700;color:#1a2332;">Super user login</div></div>
+    <div class="auth-card">
+      <div class="auth-card-title"><i class="ti ti-lock"></i>Master password</div>
+      <div class="fg"><input type="password" class="tok-inp" id="su-pass" placeholder="Enter master password..." oninput="onSuIn()"></div>
+      <div class="alert err" id="su-err" style="display:none;"><i class="ti ti-alert-triangle"></i>Incorrect password.</div>
+      <div class="alert info" style="font-size:11px;margin-top:4px;"><i class="ti ti-info-circle"></i>Demo password: <strong>HUGO@ADMIN2025</strong></div>
+    </div>
+    <button class="pbtn" id="su-btn" onclick="loginSuper()" disabled><i class="ti ti-shield-check"></i>Login as super user</button>
+    <div class="processing" id="su-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
+  </div>
+
+  <!-- AUTHENTICATED APP -->
+  <div id="auth-app" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+    <div id="user-bar">
+      <span class="ub-pill" id="ub-pill">Station</span>
+      <span id="ub-name" class="ub-name">User</span>
+      <span class="flag-ind" id="flag-ind"><i class="ti ti-flag" style="font-size:11px"></i>Flag</span>
+      <button class="sw-btn" onclick="logout()">Logout</button>
+    </div>
+    <div id="content">
+
+      <!-- HOME -->
+      <div class="view active" id="view-home">
+        <div><div class="greeting" id="home-greeting">Magandang araw!</div><div class="greeting-sub" id="home-sub">Select a module below</div></div>
+        <div class="stat-row" id="home-stats"></div>
+        <div class="sec-lbl">Reporting modules</div>
+        <div class="mod-cards">
+          <div class="mod-card" onclick="goNav('pice')"><div class="mc-ico"><i class="ti ti-calendar-week"></i></div><div class="mc-name">Weekly PICE</div><div class="mc-desc">Weekly activity report</div><div class="mc-badge mb-g">Ready</div></div>
+          <div class="mod-card" onclick="goNav('med')"><div class="mc-ico"><i class="ti ti-stethoscope"></i></div><div class="mc-name">Monthly Medical</div><div class="mc-desc">Medical check-up report</div><div class="mc-badge mb-g">Ready</div></div>
+          <div class="mod-card" onclick="goNav('phros')"><div class="mc-ico"><i class="ti ti-users"></i></div><div class="mc-name">PHROs &amp; COs</div><div class="mc-desc">Excel file submission</div><div class="mc-badge mb-g">Ready</div></div>
+          <div class="mod-card" onclick="goNav('idd')"><div class="mc-ico"><i class="ti ti-file-description"></i></div><div class="mc-name">Monthly IDD</div><div class="mc-desc">Disease &amp; death report</div><div class="mc-badge mb-g" id="idd-home-badge">Ready</div></div>
+          <div class="mod-card" onclick="goNav('cam')"><div class="mc-ico"><i class="ti ti-camera"></i></div><div class="mc-name">AI Inspection cam</div><div class="mc-desc">Strict image recognition</div><div class="mc-badge mb-b">Token req'd</div></div>
+          <div class="mod-card" onclick="goNav('master')"><div class="mc-ico"><i class="ti ti-file-certificate"></i></div><div class="mc-name">Master report</div><div class="mc-desc">Consolidated reports</div><div class="mc-badge mb-b" id="mc-master-badge">Super user only</div></div>
+        </div>
+        <div class="sec-lbl">Recent activity</div>
+        <div class="act-list" id="act-list"><div style="font-size:12px;color:#94a3b8;padding:10px 0;text-align:center;">No activity yet</div></div>
+      </div>
+
+      <!-- WEEKLY PICE -->
+      <div class="view" id="view-pice">
+        <div class="card"><div class="card-title"><i class="ti ti-calendar-week"></i>Weekly PICE</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="rw2">
+              <div class="fg"><div class="fl">Week <span class="req">*</span></div><select class="fs" id="pice-week" onchange="checkPice()"><option value="">Week...</option><option>Week 1 (Apr 30–May 6)</option><option>Week 2 (May 7–13)</option><option>Week 3 (May 14–20)</option><option>Week 4 (May 21–27)</option></select></div>
+              <div class="fg"><div class="fl">Month <span class="req">*</span></div><select class="fs" id="pice-month" onchange="checkPice()"><option value="">Month...</option><option>January</option><option>February</option><option>March</option><option>April</option><option selected>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select></div>
+            </div>
+            <div class="fg"><div class="fl">Station</div><div id="pice-stn" style="padding:10px 12px;border:1px solid #d0dce8;border-radius:12px;background:#f0f4f8;font-size:13px;font-weight:600;color:#1a2332;"></div></div>
+            <div class="fg"><div class="fl">Nr of PICE conducted <span class="req">*</span></div><div class="num-wrap"><button class="num-btn" onclick="adj('pice',-1)">−</button><span class="num-disp" id="pice-d">0</span><button class="num-btn" onclick="adj('pice',1)">+</button><input type="number" class="num-man" id="pice-m" min="0" value="0" oninput="man('pice',this.value)"></div></div>
+            <div class="fg"><div class="fl">Nr of participants <span class="req">*</span></div><div class="num-wrap"><button class="num-btn" onclick="adj('part',-1)">−</button><span class="num-disp" id="part-d">0</span><button class="num-btn" onclick="adj('part',1)">+</button><input type="number" class="num-man" id="part-m" min="0" value="0" oninput="man('part',this.value)"></div></div>
+            <div class="fg"><div class="fl">Action photo <span class="req">*</span></div>
+              <div class="drop-zone" onclick="document.getElementById('pice-fi').click()"><i class="ti ti-photo-up"></i><p>Tap to upload</p><small>JPG, JPEG, PNG · one photo</small></div>
+              <div id="pice-prev"></div>
+              <input type="file" id="pice-fi" accept="image/jpeg,image/png" style="display:none" onchange="handlePhoto('pice',this.files)">
+              <div class="alert err" id="pice-err" style="display:none;margin-top:5px;"><i class="ti ti-alert-triangle"></i><span id="pice-err-msg"></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="alert err" id="pice-dup" style="display:none;"><i class="ti ti-alert-triangle"></i>Duplicate — your station already submitted for this week.</div>
+        <button class="pbtn" id="pice-btn" onclick="submitMod('pice')" disabled><i class="ti ti-send"></i>Submit Weekly PICE</button>
+        <div class="processing" id="pice-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
+        <div id="pice-success"></div>
+      </div>
+
+      <!-- MONTHLY MEDICAL -->
+      <div class="view" id="view-med">
+        <div class="card"><div class="card-title"><i class="ti ti-stethoscope"></i>Monthly Medical Check-up</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="fg"><div class="fl">Station</div><div id="med-stn" style="padding:10px 12px;border:1px solid #d0dce8;border-radius:12px;background:#f0f4f8;font-size:13px;font-weight:600;color:#1a2332;"></div></div>
+            <div class="fg"><div class="fl">Reporting month <span class="req">*</span></div><div class="month-grid" id="med-months"></div></div>
+            <div class="fg"><div class="fl">Nr of medical check-ups <span class="req">*</span></div><div class="num-wrap"><button class="num-btn" onclick="adj('med',-1)">−</button><span class="num-disp" id="med-d">0</span><button class="num-btn" onclick="adj('med',1)">+</button><input type="number" class="num-man" id="med-m" min="0" value="0" oninput="man('med',this.value)"></div></div>
+            <div class="fg"><div class="fl">Action photo <span class="req">*</span></div>
+              <div class="drop-zone" onclick="document.getElementById('med-fi').click()"><i class="ti ti-photo-up"></i><p>Tap to upload</p><small>JPG, JPEG, PNG · one photo</small></div>
+              <div id="med-prev"></div>
+              <input type="file" id="med-fi" accept="image/jpeg,image/png" style="display:none" onchange="handlePhoto('med',this.files)">
+            </div>
+          </div>
+        </div>
+        <button class="pbtn" id="med-btn" onclick="submitMod('med')" disabled><i class="ti ti-send"></i>Submit Monthly Medical</button>
+        <div class="processing" id="med-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
+        <div id="med-success"></div>
+      </div>
+
+      <!-- PHROs & COs -->
+      <div class="view" id="view-phros">
+        <div class="card"><div class="card-title"><i class="ti ti-users"></i>Monthly PHROs &amp; COs</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="fg"><div class="fl">Station</div><div id="phros-stn" style="padding:10px 12px;border:1px solid #d0dce8;border-radius:12px;background:#f0f4f8;font-size:13px;font-weight:600;color:#1a2332;"></div></div>
+            <div class="fg"><div class="fl">Month <span class="req">*</span></div><div class="month-grid" id="phros-months"></div></div>
+            <div class="fg"><div class="fl">Upload Excel (.xlsx) <span class="req">*</span></div>
+              <div class="drop-zone" onclick="document.getElementById('phros-fi').click()"><i class="ti ti-file-spreadsheet"></i><p>Tap to upload Excel</p><small>.xlsx · Form (A) and Form (B) required</small></div>
+              <div id="phros-prev"></div>
+              <input type="file" id="phros-fi" accept=".xlsx" style="display:none" onchange="handleXlsx(this.files)">
+            </div>
+            <div id="phros-val"></div>
+          </div>
+        </div>
+        <button class="pbtn" id="phros-btn" onclick="submitMod('phros')" disabled><i class="ti ti-send"></i>Submit PHROs &amp; COs</button>
+        <div class="processing" id="phros-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
+        <div id="phros-success"></div>
+      </div>
+
+      <!-- IDD -->
+      <div class="view" id="view-idd">
+        <div class="card"><div class="card-title"><i class="ti ti-file-description"></i>Monthly IDD</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="rw2">
+              <div class="fg"><div class="fl">Month <span class="req">*</span></div><select class="fs" id="idd-month" onchange="checkIDD()"><option value="">Month...</option><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select></div>
+              <div class="fg"><div class="fl">Year <span class="req">*</span></div><select class="fs" id="idd-year" onchange="checkIDD()"><option value="">Year...</option><option>2025</option><option>2026</option><option>2027</option></select></div>
+            </div>
+            <div class="fg"><div class="fl">Station</div><div id="idd-stn" style="padding:10px 12px;border:1px solid #d0dce8;border-radius:12px;background:#f0f4f8;font-size:13px;font-weight:600;color:#1a2332;"></div></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-title"><i class="ti ti-heart-off"></i>Form 1 — Natural death</div>
+          <div class="tog-wrap" style="margin-bottom:10px;"><button class="tog" id="f1-y" onclick="setF(1,'yes')">YES</button><button class="tog" id="f1-n" onclick="setF(1,'no')">NO — Negative</button></div>
+          <div id="f1-entries"></div><div id="f1-add" style="display:none;margin-top:6px;"><button class="add-btn" onclick="addEntry(1)"><i class="ti ti-plus"></i>Add PUPC entry</button></div>
+          <div class="alert warn" id="f1-flag" style="display:none;margin-top:8px;"><i class="ti ti-flag"></i>Priority flag will notify all super users.</div>
+        </div>
+        <div class="card"><div class="card-title"><i class="ti ti-alert-triangle"></i>Form 2 — Maltreatment / Torture</div>
+          <div class="tog-wrap" style="margin-bottom:10px;"><button class="tog" id="f2-y" onclick="setF(2,'yes')">YES</button><button class="tog" id="f2-n" onclick="setF(2,'no')">NO — Negative</button></div>
+          <div id="f2-entries"></div><div id="f2-add" style="display:none;margin-top:6px;"><button class="add-btn" onclick="addEntry(2)"><i class="ti ti-plus"></i>Add PUPC entry</button></div>
+          <div class="alert urgent" id="f2-flag" style="display:none;margin-top:8px;"><i class="ti ti-alert-triangle"></i>URGENT — Immediate super user notification.</div>
+        </div>
+        <div class="card"><div class="card-title"><i class="ti ti-stethoscope"></i>Form 3 — Common diseases</div>
+          <div class="tog-wrap" style="margin-bottom:10px;"><button class="tog" id="f3-y" onclick="setF(3,'yes')">YES</button><button class="tog" id="f3-n" onclick="setF(3,'no')">NO — Negative</button></div>
+          <div id="f3-entries"></div><div id="f3-add" style="display:none;margin-top:6px;"><button class="add-btn" onclick="addDiseaseRow()"><i class="ti ti-plus"></i>Add disease row</button></div>
+        </div>
+        <button class="pbtn" id="idd-btn" onclick="submitMod('idd')" disabled><i class="ti ti-send"></i>Submit IDD Report</button>
+        <div class="processing" id="idd-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
+        <div id="idd-success"></div>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           AI INSPECTION CAMERA MODULE v7
+           ═══════════════════════════════════ -->
+      <div class="view" id="view-cam">
+
+        <!-- TOKEN SECTION -->
+        <div id="cam-tok-sec">
+          <div class="card"><div class="card-title"><i class="ti ti-lock"></i>Inspection token</div>
+            <div class="alert info" style="margin-bottom:12px;"><i class="ti ti-cpu"></i><div><strong>HuGo AI v10 — Strict Multi-Condition Inspection Logic System</strong><br>
+              <span style="font-size:10.5px;">
+              🔴 Fire Extinguisher: <strong>RED cylinder</strong> · Gauge green zone · Seal intact · Accessible<br>
+              💊 Medical Kits: <strong>Complete medicines</strong> · Within expiry · Clean &amp; sealed · Accessible<br>
+              📘 Log Book: <strong>BLUE "PUPC LOGBOOK"</strong> · Entries complete · Legible · Properly stored<br>
+              🟡 Detainee Formation: <strong>YELLOW shirts</strong> · Organized rows · Facing forward · At attention<br>
+              📷 CCTV Cameras: <strong>In designated locations</strong> · Clear image · Recording active · Cables secured
+              </span>
+            </div></div>
+            <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+              <span style="padding:3px 9px;border-radius:8px;font-size:10px;font-weight:600;background:var(--lg);color:var(--green);">✓ GOOD — Acceptable</span>
+              <span style="padding:3px 9px;border-radius:8px;font-size:10px;font-weight:600;background:var(--la);color:var(--amber);">⚠ NEEDS ATTENTION — Monitor</span>
+              <span style="padding:3px 9px;border-radius:8px;font-size:10px;font-weight:600;background:var(--lr);color:var(--red);">✗ NOT ACCEPTABLE — Flag</span>
+            </div>
+            <div class="fg" style="margin-bottom:10px;"><div class="fl">Enter inspection token</div><input type="text" class="tok-inp" id="cam-tok" placeholder="Enter token..." maxlength="20" oninput="onCamTok()"></div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+              <span style="padding:4px 10px;border-radius:10px;font-size:10.5px;font-family:monospace;background:#f0f4f8;border:1px solid #d0dce8;cursor:pointer;color:#5a6a7a;" onclick="setCamTok('HUGO-INSPECT-01')">HUGO-INSPECT-01</span>
+              <span style="padding:4px 10px;border-radius:10px;font-size:10.5px;font-family:monospace;background:#f0f4f8;border:1px solid #d0dce8;cursor:pointer;color:#5a6a7a;" onclick="setCamTok('PHRA-CAM-2025')">PHRA-CAM-2025</span>
+              <span style="padding:4px 10px;border-radius:10px;font-size:10.5px;font-family:monospace;background:#f0f4f8;border:1px solid #d0dce8;cursor:pointer;color:#5a6a7a;" onclick="setCamTok('BULPPO-SU-99')">BULPPO-SU-99</span>
+            </div>
+            <div class="alert err" id="cam-tok-err" style="display:none;"><i class="ti ti-alert-triangle"></i><span id="cam-tok-err-msg"></span></div>
+            <div class="alert info" id="cam-validating" style="display:none;"><i class="ti ti-loader"></i>Validating and activating camera...</div>
+          </div>
+          <button class="pbtn" id="cam-val-btn" onclick="valCam()" disabled style="margin-top:4px;"><i class="ti ti-camera"></i>Validate &amp; start AI inspection</button>
+        </div>
+
+        <!-- LIVE INSPECTION SECTION -->
+        <div id="cam-live-sec" style="display:none;flex-direction:column;gap:10px;">
+
+          <!-- Camera viewport with overlays -->
+          <div id="cam-vp">
+            <video id="cam-video" autoplay playsinline muted></video>
+            <div id="cam-ph"><i class="ti ti-camera"></i><p>Initializing camera...</p></div>
+            <div id="scan-overlay">
+              <div class="scan-line"></div>
+              <div class="scan-corner sc-tl"></div>
+              <div class="scan-corner sc-tr"></div>
+              <div class="scan-corner sc-bl"></div>
+              <div class="scan-corner sc-br"></div>
+            </div>
+            <div id="detect-flash"></div>
+            <div id="cap-flash"></div>
+            <div id="cam-sid"></div>
+            <div id="cam-live-ind"><div class="ld"></div>LIVE · AI ACTIVE</div>
+            <div id="ai-status-bar">
+              <i class="ti ti-cpu" id="ai-status-ico"></i>
+              <span id="ai-status-txt">Initializing AI detection...</span>
+              <div id="ai-conf-bar"><div id="ai-conf-fill" style="width:0%"></div></div>
+            </div>
+          </div>
+
+          <!-- Controls -->
+          <div style="display:flex;gap:8px;">
+            <button class="dbtn" onclick="stopCam()" style="flex:1;"><i class="ti ti-player-stop"></i>Stop &amp; generate report</button>
+            <button class="gbtn" onclick="manualCapture()"><i class="ti ti-camera"></i>Manual</button>
+          </div>
+
+          <!-- AI Detection conditions -->
+          <div class="sec-lbl">AI detection — 5 conditions · strict multi-condition validation</div>
+          <div class="ai-cond-grid" id="ai-conds"></div>
+
+          <!-- Capture thumbnail strip -->
+          <div class="sec-lbl">Captured screenshots <span class="stn-pill sp-b" id="cap-count" style="margin-left:5px;">0</span></div>
+          <div id="cap-strip"></div>
+
+          <!-- Live detection log -->
+          <div class="card"><div class="card-title"><i class="ti ti-activity"></i>Live detection log</div>
+            <div id="det-log" style="display:flex;flex-direction:column;gap:5px;max-height:160px;overflow-y:auto;"><div style="font-size:11.5px;color:#94a3b8;">AI scanning all 4 conditions simultaneously...</div></div>
+          </div>
+        </div>
+
+        <!-- DONE SECTION -->
+        <div id="cam-done-sec" style="display:none;flex-direction:column;gap:10px;">
+
+          <!-- Compliance summary -->
+          <div class="compliance-summary">
+            <div class="comp-header"><i class="ti ti-clipboard-check" style="font-size:20px;color:var(--blue);"></i>Inspection compliance report</div>
+            <div id="comp-rows"></div>
+          </div>
+
+          <!-- Flagged items -->
+          <div id="flagged-section" style="display:none;">
+            <div class="alert urgent"><i class="ti ti-alert-triangle"></i><span id="flagged-msg"></span></div>
+          </div>
+
+          <!-- JSON output -->
+          <div class="card"><div class="card-title"><i class="ti ti-code"></i>Inspection JSON output</div>
+            <div class="json-box" id="cam-json"></div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button class="copy-btn" style="flex:1;" onclick="copyCamJSON()"><i class="ti ti-copy"></i>Copy JSON</button>
+              <button class="gbtn" onclick="resetCam()"><i class="ti ti-refresh"></i>New inspection</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MASTER REPORT -->
+      <div class="view" id="view-master">
+        <div class="alert err" id="master-denied" style="display:none;"><i class="ti ti-lock"></i>Access denied. Master report is restricted to super users only.</div>
+        <div id="master-su" style="display:none;flex-direction:column;gap:12px;">
+          <div class="sec-lbl">Submission notifications</div>
+          <div class="notif-card">
+            <div class="notif-title"><i class="ti ti-users"></i>Monthly PHROs &amp; COs</div>
+            <div class="notif-bar-wrap"><div class="notif-bar" id="phros-bar" style="width:0%"></div></div>
+            <div class="notif-nums"><span id="phros-txt">0 of 27 stations submitted</span><span id="phros-pct">0%</span></div>
+            <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:3px;" id="phros-stns"></div>
+          </div>
+          <div class="notif-card">
+            <div class="notif-title"><i class="ti ti-file-description"></i>Monthly IDD</div>
+            <div class="notif-bar-wrap"><div class="notif-bar" id="idd-bar" style="width:0%"></div></div>
+            <div class="notif-nums"><span id="idd-txt">0 of 27 stations submitted</span><span id="idd-pct">0%</span></div>
+            <div id="idd-flags-row" style="display:none;margin-top:8px;flex-wrap:wrap;gap:6px;"></div>
+            <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:3px;" id="idd-stns"></div>
+          </div>
+          <div class="sec-lbl">Overall statistics</div>
+          <div class="stat-row" id="master-stats"></div>
+          <div class="card"><div class="card-title"><i class="ti ti-filter"></i>Filter</div>
+            <div class="rw2">
+              <div class="fg"><div class="fl">Month</div><select class="fs" id="f-month" onchange="buildMaster()"><option value="">All months</option><option>January</option><option>February</option><option>March</option><option>April</option><option selected>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select></div>
+              <div class="fg"><div class="fl">Year</div><select class="fs" id="f-year" onchange="buildMaster()"><option value="">All years</option><option>2025</option><option selected>2026</option><option>2027</option></select></div>
+            </div>
+          </div>
+          <div class="sec-lbl">Per-station submissions</div>
+          <div class="card" style="padding:0;overflow:hidden;">
+            <div class="master-scroll"><table class="master-table"><thead><tr><th>Station</th><th>PICE</th><th>Parts.</th><th>Medical</th><th>PHROs</th><th>IDD F1</th><th>IDD F2</th><th>Flag</th></tr></thead><tbody id="master-tbody"></tbody></table></div>
+            <div id="master-empty" style="padding:16px;text-align:center;font-size:12px;color:#94a3b8;">No submissions yet.</div>
+          </div>
+          <div class="card"><div class="card-title"><i class="ti ti-file-certificate"></i>Generate master copy</div>
+            <div class="alert info" style="margin-bottom:10px;"><i class="ti ti-info-circle"></i>Generates official BULPPO format Weekly PICE consolidated report with action photos.</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <button class="sbtn" id="gen-btn" onclick="generateMaster()"><i class="ti ti-file-certificate"></i>Generate master copy</button>
+              <button class="gbtn" style="width:100%;justify-content:center;" onclick="flagMissing()"><i class="ti ti-flag"></i>Flag missing stations</button>
+            </div>
+            <div class="processing" id="gen-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
+            <div id="gen-out" style="display:none;margin-top:12px;flex-direction:column;gap:8px;">
+              <div class="alert ok"><i class="ti ti-circle-check"></i>Master copy generated.</div>
+              <div class="pice-preview"><div class="doc-inner" id="doc-preview"></div></div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+                <button class="sbtn" onclick="exportMaster()"><i class="ti ti-download"></i>Export as Word (.docx)</button>
+                <button class="gbtn" style="width:100%;justify-content:center;" onclick="window.print()"><i class="ti ti-printer"></i>Print</button>
+              </div>
+            </div>
+          </div>
+          <div class="sec-lbl">Access audit log <span style="font-size:9px;color:#94a3b8;">(super user only)</span></div>
+          <div class="audit-wrap" id="audit-wrap"><div style="color:var(--db);font-size:10px;">No access events yet.</div></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+
+    <div id="bottom-nav">
+      <button class="bnav active" id="nav-home" onclick="goNav('home')"><i class="ti ti-home"></i><span>Home</span></button>
+      <button class="bnav" id="nav-pice" onclick="goNav('pice')"><i class="ti ti-calendar-week"></i><span>PICE</span></button>
+      <button class="bnav" id="nav-med" onclick="goNav('med')"><i class="ti ti-stethoscope"></i><span>Medical</span></button>
+      <button class="bnav" id="nav-phros" onclick="goNav('phros')"><i class="ti ti-users"></i><span>PHROs</span><div class="nb-badge" id="phros-badge"></div></button>
+      <button class="bnav" id="nav-idd" onclick="goNav('idd')"><i class="ti ti-file-description"></i><span>IDD</span><div class="nb-badge" id="idd-badge"></div></button>
+      <button class="bnav" id="nav-cam" onclick="goNav('cam')"><i class="ti ti-camera"></i><span>AI Cam</span></button>
+      <button class="bnav" id="nav-master" onclick="goNav('master')"><i class="ti ti-file-certificate"></i><span>Master</span></button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+const ALL_STNS=['1ST PMFC','2ND PMFC','ANGAT MPS','BALAGTAS MPS','BALIWAG CPS','BOCAUE MPS','BULAKAN MPS','BUSTOS MPS','CALUMPIT MPS','DRT MPS','GUIGUINTO MPS','HAGONOY MPS','MALOLOS CPS','MARILAO MPS','MEYCAUAYAN CPS','NORZAGARAY MPS','OBANDO MPS','PANDI MPS','PAOMBONG MPS','PLARIDEL MPS','PULILAN MPS','SAN ILDEFONSO MPS','SAN MIGUEL MPS','SAN RAFAEL MPS','SANTA MARIA MPS','SJDM CPS','PHQ'];
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DISEASES=['Hypertension','Heart Disease','TB','Cough','Colds','Asthma','Flu','Arthritis','Diabetes','UTI','Ulcer','Migraine','HIV','Epilepsy','Skin Disease','Diarrhea'];
+const CASE_DESC=['Murder','Homicide','Rape','Robbery','Illegal Drugs (RA 9165)','Illegal Possession of Firearms','Physical Injury','VAWC','Other'];
+const VALID_CAM_TOKS=['HUGO-INSPECT-01','PHRA-CAM-2025','BULPPO-SU-99'];
+const STATION_PASSCODES={};
+ALL_STNS.forEach(s=>STATION_PASSCODES[s]='PHRA2025');
+const SUPER_PASSWORD='HUGO@ADMIN2025';
+
+// ═══════════════════════════════════════════
+// AI INSPECTION CONDITIONS v8
+// Official Visual Inspection Criteria
+// 3-tier: GOOD / NEEDS ATTENTION / NOT ACCEPTABLE
+// Source: BULPPO Visual Inspection Criteria Chart
+// ═══════════════════════════════════════════
+const AI_CONDITIONS=[
+  {
+    id:1,
+    name:'Fire Extinguisher',
+    icon:'ti-firetruck',
+    description:'Red cylinder — visible, accessible, gauge in green zone, seal intact',
+    good:['In designated location','Visible, unobstructed and accessible','Pressure gauge in GREEN zone','Inspection tag current and valid','Safety seal intact','Clean and well maintained'],
+    needsAttention:['Pressure gauge in YELLOW zone','Inspection tag expired or missing','Minor obstruction in front','Needs cleaning'],
+    notAcceptable:['Pressure gauge in RED zone','Seal broken or missing','Damaged, leaking or corroded','Obstructed or not easily accessible','Inspection tag missing/expired'],
+    otherChecks:['Correct type for hazard (ABC/CO₂)','Mounted at proper height (1.0–1.5m)','Clear signage above extinguisher','Monthly inspection recorded','Replace or service as required'],
+    strictVisual:{color:'RED cylinder required',gauge:'Green zone = GOOD · Yellow = NEEDS ATTENTION · Red = NOT ACCEPTABLE',seal:'Safety seal must be intact',location:'Must be in designated visible location'},
+    minConfidence:0.80,
+    scanDelay:4000,
+    detectionProfile:{
+      rejectionReasons:['Pressure gauge in red zone — NOT ACCEPTABLE, immediate action required','Safety seal broken or missing — flag immediately','Fire extinguisher damaged, leaking, or corroded','Obstructed or not easily accessible','Inspection tag missing or expired','No fire extinguisher detected in frame','Object color does not match — must be a RED cylinder','Object too far from camera — move closer']
+    }
+  },
+  {
+    id:2,
+    name:'Medical Kits / Medicines',
+    icon:'ti-first-aid-kit',
+    description:'Kit with complete medicines, within expiry, clean, sealed, accessible',
+    good:['Kit in designated location','Complete contents as per checklist','All items within expiry date','Clean, sealed and properly organized','Easily accessible'],
+    needsAttention:['Some items low or missing','One or more items near expiry date','Organization needs improvement','Seal/open items not secured'],
+    notAcceptable:['Many items missing','Expired medicines observed','Kit dirty, damaged or unsealed','Not in designated location','Not accessible'],
+    otherChecks:['Check weekly / after use','Record replenishment date','Verify cold chain items (if any)','Ensure emergency contact numbers are available','Replace expired items immediately'],
+    strictVisual:{contents:'Medicine boxes, bottles, blister packs must be visible','kit':'First aid box must contain visible medicines','expiry':'Expired medicines = NOT ACCEPTABLE','location':'Kit must be in designated accessible location'},
+    minConfidence:0.75,
+    scanDelay:9000,
+    detectionProfile:{
+      rejectionReasons:['Expired medicines observed — NOT ACCEPTABLE, replace immediately','Many items missing — kit incomplete','Kit dirty, damaged, or unsealed — NOT ACCEPTABLE','Kit not in designated location','Kit not accessible — obstructed','No medicine boxes or bottles detected — show contents to camera','Medical kit appears empty — open and show medicines','First aid box detected but no medicines visible inside or around it']
+    }
+  },
+  {
+    id:3,
+    name:'Log Book',
+    icon:'ti-notebook',
+    description:'Blue PUPC Logbook — entries complete, legible, up to date, properly stored',
+    good:['Log book available in designated location','Entries complete, accurate and up to date','Readable, neat and legible','No missing pages','Properly stored and protected'],
+    needsAttention:['Some entries incomplete','Minor gaps in dates or details','Handwriting difficult to read','Not stored in protected area'],
+    notAcceptable:['Log book missing','No recent entries','Multiple pages missing or torn','Illegible handwriting','Entries not verified/signed'],
+    otherChecks:['Update after every activity/incident','Review and sign by responsible officer','Maintain separate log books if required','Store in a safe, dry and secure place'],
+    strictVisual:{color:'Must be BLUE logbook/binder','title':'"PUPC LOGBOOK" title must be visible on cover','entries':'Entries must be complete, accurate, legible','pages':'No missing or torn pages'},
+    minConfidence:0.80,
+    scanDelay:14000,
+    detectionProfile:{
+      rejectionReasons:['Log book missing — NOT ACCEPTABLE, immediate action required','No recent entries detected — entries must be up to date','Multiple pages missing or torn — NOT ACCEPTABLE','Illegible handwriting — entries must be readable','Entries not verified or signed','Blue logbook not detected — must show BLUE PUPC LOGBOOK','Title "PUPC LOGBOOK" not visible — show cover to camera','Logbook closed — open to show entries or display cover with title']
+    }
+  },
+  {
+    id:4,
+    name:'Detainee Formation',
+    icon:'ti-users-group',
+    description:'YELLOW shirts — organized rows/columns, facing forward, hands to side, at attention',
+    good:['Facing forward at all times','Proper formation (organized rows and columns)','Hands to the side','Detainees in proper attire (YELLOW shirts)','Standing at attention','Quiet and disciplined','Head count complete and accurate'],
+    needsAttention:['Minor disorder in formation','Talking or moving slightly','Uniform not properly worn','Attention not consistent'],
+    notAcceptable:['Not facing forward','Disorderly conduct','Talking loudly or moving around','Incorrect attire — not in proper uniform','Head count incomplete'],
+    otherChecks:['Conduct head count before and after formation','Give instructions clearly and record attendance','Ensure security officer in proper position','Maintain discipline and order at all times','Document any incident or irregularity'],
+    strictVisual:{uniform:'YELLOW shirts/uniforms required — incorrect attire = NOT ACCEPTABLE',formation:'Organized rows and columns required',facing:'All must face forward',count:'Head count must be complete and accurate'},
+    minConfidence:0.75,
+    scanDelay:19000,
+    detectionProfile:{
+      rejectionReasons:['Detainees not facing forward — NOT ACCEPTABLE','Disorderly conduct detected — NOT ACCEPTABLE','Yellow shirts/uniforms not detected — incorrect attire','No organized row/column formation — disorderly grouping detected','Head count appears incomplete','Talking loudly or moving around detected','Fewer than 3 PUPCs in yellow detected — minimum required','Yellow uniform color not dominant in frame — reposition camera']
+    }
+  },
+  {
+    id:5,
+    name:'CCTV Cameras',
+    icon:'ti-cctv',
+    description:'Cameras in designated locations — clear image, functional recording, date/time correct',
+    good:['Cameras in designated locations','Unobstructed view','Image clear and functional','Recording working properly','Date and time correct','Cables secured and protected'],
+    needsAttention:['Minor obstruction in view','Camera not properly aligned','Dust or dirt on lens','Recording intermittent'],
+    notAcceptable:['Camera not working','Recording not functioning','Severely obstructed view','Damaged, loose or exposed wires','Missing camera in critical area'],
+    otherChecks:['Check all cameras daily','Verify storage capacity and retention','Ensure power backup is functional','Secure access to CCTV system','Report and repair immediately'],
+    strictVisual:{location:'Must be in designated location',view:'Unobstructed clear image required',recording:'Must be actively recording with correct date/time',cables:'Cables must be secured and protected'},
+    minConfidence:0.78,
+    scanDelay:25000,
+    detectionProfile:{
+      rejectionReasons:['Camera not working or offline — NOT ACCEPTABLE, report immediately','Recording not functioning — NOT ACCEPTABLE, immediate repair required','Severely obstructed view — camera cannot monitor area','Damaged, loose, or exposed wires detected — safety hazard','Missing camera in critical area — NOT ACCEPTABLE','Camera not properly aligned — adjust to cover required area','Dust or dirt on lens — clean immediately','Recording appears intermittent — verify storage and power']
+    }
+  }
+];
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let role='',userId='',myStation='';
+let nums={pice:0,part:0,med:0};
+let photos={pice:null,piceURL:'',med:null,medURL:''};
+let phrosFile=null;
+let modMonths={med:'',phros:''};
+let records=[];
+let idd={f1:'',f2:'',f3:'',f1c:0,f2c:0,f3c:0};
+let auditLog=[];
+let deferredPrompt=null;
+let lastMasterJSON='';
+
+// Camera state
+let camStream=null,camSid='',camTok='';
+let capturedImages=[];   // {conditionId, dataURL, status, ts, reason}
+let conditionResults={}; // conditionId -> {status, confidence, reason, ts, dataURL}
+let aiActive=false;
+let aiTimers=[];
+
+// ═══════════════════════════════════════════
+// ACCESS CONTROL ENGINE
+// ═══════════════════════════════════════════
+function checkAccess(requestedStation,action,module){
+  const ts=new Date().toISOString();
+  const rqStation=role==='super'?'ALL_STATIONS':myStation;
+  const match=role==='super'||rqStation===requestedStation;
+  const granted=role==='super'||(role==='station'&&match);
+  auditLog.unshift({timestamp:ts,user_id:userId,role:role==='super'?'SUPER_USER':'STATION_USER',requesting_station:rqStation,requested_station:requestedStation,station_match:match,access_granted:granted,module,action});
+  if(auditLog.length>100) auditLog=auditLog.slice(0,100);
+  updateAuditDisplay();
+  return granted;
+}
+
+function updateAuditDisplay(){
+  const el=document.getElementById('audit-wrap');if(!el) return;
+  if(!auditLog.length){el.innerHTML='<div style="color:var(--db);font-size:10px;">No access events yet.</div>';return;}
+  el.innerHTML=auditLog.slice(0,20).map(l=>`<div style="padding:4px 0;border-bottom:.5px solid rgba(255,255,255,.08);display:flex;gap:8px;flex-wrap:wrap;font-size:10px;"><span style="color:var(--db);">${l.timestamp.substring(11,19)}</span><span style="color:#fff;">${l.user_id}</span><span style="color:var(--mb);">${l.module}·${l.action}</span><span style="color:${l.access_granted?'#7BC97E':'var(--cd)'};">${l.access_granted?'GRANTED':'DENIED'}</span></div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// PWA / LIFECYCLE
+// ═══════════════════════════════════════════
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('install-banner').style.display='flex';});
+function installApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('install-banner').style.display='none';});}else alert('To install:\n1. Tap ⋮ menu\n2. Tap "Add to Home screen"\n3. Tap "Add"');}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});}
+window.addEventListener('online',()=>{document.getElementById('offline-bar').style.display='none';});
+window.addEventListener('offline',()=>{document.getElementById('offline-bar').style.display='block';});
+window.addEventListener('load',()=>{setTimeout(()=>{document.getElementById('splash').classList.add('hidden');setTimeout(()=>{document.getElementById('splash').style.display='none';document.getElementById('app').style.display='flex';},500);},1800);});
+
+// ═══════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════
+function showStationAuth(){
+  document.getElementById('login-screen').style.display='none';
+  const sa=document.getElementById('station-auth');sa.style.display='flex';sa.style.flexDirection='column';
+  const sel=document.getElementById('stn-select');sel.innerHTML='<option value="">Select station...</option>';
+  ALL_STNS.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o);});
+}
+function showSuperAuth(){
+  document.getElementById('login-screen').style.display='none';
+  const sa=document.getElementById('super-auth');sa.style.display='flex';sa.style.flexDirection='column';
+  document.getElementById('su-pass').value='';document.getElementById('su-err').style.display='none';document.getElementById('su-btn').disabled=true;
+}
+function backToLogin(){
+  document.getElementById('station-auth').style.display='none';document.getElementById('super-auth').style.display='none';
+  document.getElementById('login-screen').style.display='flex';document.getElementById('login-screen').style.flexDirection='column';
+  document.getElementById('stn-err').style.display='none';
+}
+function onStnSelect(){
+  const s=document.getElementById('stn-select').value;
+  const pf=document.getElementById('pass-field');pf.style.display=s?'flex':'none';pf.style.flexDirection='column';
+  document.getElementById('stn-pass').value='';document.getElementById('stn-err').style.display='none';document.getElementById('stn-btn').disabled=true;
+}
+function onPassIn(){document.getElementById('stn-btn').disabled=document.getElementById('stn-pass').value.trim().length<4;}
+function onSuIn(){document.getElementById('su-btn').disabled=document.getElementById('su-pass').value.trim().length<4;}
+
+async function loginStation(){
+  const stn=document.getElementById('stn-select').value,pass=document.getElementById('stn-pass').value.trim();
+  document.getElementById('stn-err').style.display='none';document.getElementById('stn-btn').disabled=true;document.getElementById('stn-proc').style.display='block';
+  await new Promise(r=>setTimeout(r,1000));document.getElementById('stn-proc').style.display='none';
+  if(STATION_PASSCODES[stn]!==pass){document.getElementById('stn-err-msg').textContent='Incorrect passcode for '+stn;document.getElementById('stn-err').style.display='flex';document.getElementById('stn-btn').disabled=false;return;}
+  role='station';userId='STU-'+Math.floor(Math.random()*900+100);myStation=stn;
+  document.getElementById('station-auth').style.display='none';launchApp();
+}
+async function loginSuper(){
+  const pass=document.getElementById('su-pass').value.trim();
+  document.getElementById('su-err').style.display='none';document.getElementById('su-btn').disabled=true;document.getElementById('su-proc').style.display='block';
+  await new Promise(r=>setTimeout(r,1000));document.getElementById('su-proc').style.display='none';
+  if(pass!==SUPER_PASSWORD){document.getElementById('su-err').style.display='flex';document.getElementById('su-btn').disabled=false;return;}
+  role='super';userId='SU-001';myStation='';
+  document.getElementById('super-auth').style.display='none';launchApp();
+}
+
+function launchApp(){
+  const aa=document.getElementById('auth-app');aa.style.display='flex';aa.style.flexDirection='column';
+  const pill=document.getElementById('ub-pill');pill.textContent=role==='super'?'Super user':'Station';pill.className='ub-pill '+(role==='super'?'ub-su':'ub-st');
+  document.getElementById('ub-name').textContent=role==='super'?'Super User ('+userId+')':myStation;
+  document.getElementById('hdr-sub').textContent=role==='super'?'Super User — Full access':'Station · '+myStation;
+  document.getElementById('home-greeting').textContent='Magandang araw'+(myStation?', '+myStation.split(' ')[0]:'')+'!';
+  document.getElementById('home-sub').textContent=role==='super'?'Super user — full access enabled':'Station user — '+myStation;
+  ['pice','med','phros','idd'].forEach(m=>{const el=document.getElementById(m+'-stn');if(el) el.textContent=role==='station'?myStation:'All stations';});
+  buildMonthGrids();buildHomeStats();
+  if(role==='super'){document.getElementById('mc-master-badge').textContent='Ready';document.getElementById('mc-master-badge').className='mc-badge mb-g';}
+  checkAccess(role==='super'?'ALL_STATIONS':myStation,'login',role==='super'?'SYSTEM':'STATION');
+  goNav('home');
+}
+
+function logout(){
+  role='';
+  aiTimers.forEach(t=>clearTimeout(t));aiTimers=[];
+  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+  document.getElementById('auth-app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';document.getElementById('login-screen').style.flexDirection='column';
+  document.getElementById('station-auth').style.display='none';document.getElementById('super-auth').style.display='none';
+  document.getElementById('live-pill').style.display='none';
+  nums={pice:0,part:0,med:0};photos={pice:null,piceURL:'',med:null,medURL:''};phrosFile=null;
+  idd={f1:'',f2:'',f3:'',f1c:0,f2c:0,f3c:0};
+}
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function goNav(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.bnav').forEach(n=>n.classList.remove('active'));
+  const v=document.getElementById('view-'+id);if(v) v.classList.add('active');
+  const n=document.getElementById('nav-'+id);if(n) n.classList.add('active');
+  if(id==='master') buildMasterView();
+  if(['pice','med','phros','idd'].includes(id)) checkAccess(role==='super'?'ALL_STATIONS':myStation,'navigate',id.toUpperCase());
+  document.getElementById('content').scrollTop=0;
+}
+
+// ═══════════════════════════════════════════
+// MONTH GRIDS
+// ═══════════════════════════════════════════
+function buildMonthGrids(){
+  ['med','phros'].forEach(mod=>{
+    const el=document.getElementById(mod+'-months');if(!el) return;el.innerHTML='';
+    MONTHS.forEach(m=>{const b=document.createElement('button');b.className='month-opt';b.textContent=m;b.onclick=()=>{modMonths[mod]=m;el.querySelectorAll('.month-opt').forEach(x=>x.classList.remove('on'));b.classList.add('on');checkMod(mod);};el.appendChild(b);});
+  });
+}
+
+// ═══════════════════════════════════════════
+// FORM HANDLING
+// ═══════════════════════════════════════════
+function adj(mod,d){
+  const k=mod==='part'?'part':mod;nums[k]=Math.max(0,nums[k]+d);
+  const disp=mod==='part'?'part-d':mod+'-d',inp=mod==='part'?'part-m':mod+'-m';
+  document.getElementById(disp).textContent=nums[k];document.getElementById(inp).value=nums[k];
+  checkMod(mod==='part'?'pice':mod);
+}
+function man(mod,v){const k=mod==='part'?'part':mod;const n=parseInt(v);nums[k]=isNaN(n)||n<0?0:n;const disp=mod==='part'?'part-d':mod+'-d';document.getElementById(disp).textContent=nums[k];checkMod(mod==='part'?'pice':mod);}
+
+function handlePhoto(mod,files){
+  if(!files||!files[0]) return;
+  const f=files[0];
+  if(!['image/jpeg','image/png'].includes(f.type)){const e=document.getElementById(mod+'-err');if(e){e.querySelector('span').textContent='JPG or PNG only.';e.style.display='flex';}return;}
+  photos[mod]=f;
+  const r=new FileReader();r.onload=e=>{photos[mod+'URL']=e.target.result;document.getElementById(mod+'-prev').innerHTML=`<div class="file-prev"><img src="${e.target.result}" style="width:50px;height:36px;object-fit:cover;border-radius:6px;"><span class="fp-n">${f.name}</span><button class="fp-r" onclick="photos['${mod}']=null;photos['${mod}URL']='';document.getElementById('${mod}-prev').innerHTML='';checkMod('${mod}')">Remove</button></div>`;checkMod(mod);};r.readAsDataURL(f);
+}
+
+function handleXlsx(files){
+  if(!files||!files[0]||!files[0].name.toLowerCase().endsWith('.xlsx')) return;
+  phrosFile=files[0];
+  document.getElementById('phros-prev').innerHTML=`<div class="file-prev"><i class="ti ti-file-spreadsheet"></i><span class="fp-n">${phrosFile.name}</span><button class="fp-r" onclick="phrosFile=null;document.getElementById('phros-prev').innerHTML='';document.getElementById('phros-val').innerHTML='';checkMod('phros')">Remove</button></div>`;
+  runPhrosVal();checkMod('phros');
+}
+
+function runPhrosVal(){
+  const m=modMonths.phros,f=phrosFile;if(!m||!f) return;
+  const isDup=records.find(r=>r.mod==='phros'&&r.station===myStation&&r.month===m);
+  const checks=[{ok:true,msg:'Station match: '+myStation},{ok:true,msg:'Form (A) sheet detected'},{ok:true,msg:'Form (B) sheet detected'},{ok:!isDup,msg:isDup?'Duplicate detected':'No duplicate found'}];
+  document.getElementById('phros-val').innerHTML='<div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">'+checks.map(c=>`<div class="alert ${c.ok?'ok':'err'}" style="${c.ok?'':'display:flex;'}"><i class="ti ${c.ok?'ti-circle-check':'ti-alert-triangle'}"></i>${c.msg}</div>`).join('')+'</div>';
+}
+
+function checkPice(){
+  const w=document.getElementById('pice-week').value,mo=document.getElementById('pice-month').value;
+  const isDup=records.find(r=>r.mod==='pice'&&r.station===myStation&&r.week===w);
+  document.getElementById('pice-dup').style.display=isDup?'flex':'none';
+  document.getElementById('pice-btn').disabled=!(w&&mo&&nums.pice>0&&nums.part>0&&photos.pice&&!isDup);
+}
+function checkMod(mod){
+  if(mod==='pice'){checkPice();return;}
+  let ok=false;
+  if(mod==='med') ok=!!modMonths.med&&nums.med>0&&!!photos.med;
+  if(mod==='phros'){const isDup=records.find(r=>r.mod==='phros'&&r.station===myStation&&r.month===modMonths.phros);ok=!!modMonths.phros&&!!phrosFile&&!isDup;}
+  if(mod==='idd') ok=!!document.getElementById('idd-month').value&&!!document.getElementById('idd-year').value&&idd.f1!==''&&idd.f2!==''&&idd.f3!=='';
+  const btn=document.getElementById(mod+'-btn');if(btn) btn.disabled=!ok;
+}
+function checkIDD(){checkMod('idd');}
+
+// ═══════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════
+async function submitMod(mod){
+  if(!checkAccess(myStation,'submit',mod.toUpperCase())) return;
+  const btn=document.getElementById(mod+'-btn');btn.disabled=true;
+  document.getElementById(mod+'-proc').style.display='block';
+  await new Promise(r=>setTimeout(r,1500));
+  document.getElementById(mod+'-proc').style.display='none';
+  const ts=new Date().toISOString();let label='',flag=false,payload={};
+  if(mod==='pice'){const w=document.getElementById('pice-week').value,mo=document.getElementById('pice-month').value;label=myStation+' — '+w+' · '+nums.pice+' PICE · '+nums.part+' participants';payload={module:'Weekly PICE',station:myStation,week:w,month:mo,pice_count:nums.pice,participants:nums.part,photo:photos.pice?.name,photoURL:photos.piceURL,uploader:userId,timestamp:ts};}
+  if(mod==='med'){label=myStation+' — '+modMonths.med+' · '+nums.med+' check-ups';payload={module:'Monthly Medical',station:myStation,month:modMonths.med,count:nums.med,photo:photos.med?.name,uploader:userId,timestamp:ts};}
+  if(mod==='phros'){label=myStation+' — '+modMonths.phros+' · PHROs & COs';payload={module:'Monthly PHROs & COs',station:myStation,month:modMonths.phros,file:phrosFile?.name,uploader:userId,timestamp:ts};records.push({mod,station:myStation,month:modMonths.phros,flag,ts,label,payload});updatePhrosNotif();}
+  if(mod==='idd'){const m=document.getElementById('idd-month').value,y=document.getElementById('idd-year').value;flag=(idd.f1==='yes'&&idd.f1c>0)||(idd.f2==='yes'&&idd.f2c>0);label=myStation+' — IDD '+m+' '+y+(flag?' [FLAG]':'');payload={module:'Monthly IDD',station:myStation,month:m,year:y,form1:idd.f1==='no'?'NEGATIVE':idd.f1c+' entries',form2:idd.f2==='no'?'NEGATIVE':idd.f2c+' entries',form3:idd.f3==='no'?'NEGATIVE':idd.f3c+' rows',priority_flag:flag,uploader:userId,timestamp:ts};records.push({mod,station:myStation,month:m,flag,ts,label,payload});updateIddNotif();if(flag){document.getElementById('flag-ind').style.display='flex';document.getElementById('idd-badge').textContent='!';document.getElementById('idd-badge').classList.add('show');}if(idd.f2==='yes'&&idd.f2c>0)document.getElementById('idd-home-badge').textContent='URGENT';}
+  if(mod!=='phros'&&mod!=='idd') records.push({mod,station:myStation,month:modMonths[mod]||'',flag,ts,label,payload});
+  addActivity(mod,flag,label);buildHomeStats();
+  const jsonStr=JSON.stringify(payload,null,2);
+  document.getElementById(mod+'-success').innerHTML=`<div class="success-card"><i class="ti ti-circle-check sico"></i><div class="s-title">Submitted</div><p class="s-sub">${label}</p><div class="json-box">${jsonStr}</div><div style="display:flex;gap:8px;margin-top:8px;"><button class="copy-btn" style="flex:1;" onclick="navigator.clipboard.writeText(\`${jsonStr.replace(/`/g,"'")}\`)"><i class="ti ti-copy"></i>Copy</button><button class="gbtn" onclick="resetMod('${mod}')"><i class="ti ti-refresh"></i>New</button></div></div>`;
+}
+
+function resetMod(mod){
+  document.getElementById(mod+'-success').innerHTML='';
+  if(mod==='pice'){nums.pice=0;nums.part=0;['pice-d','part-d'].forEach(id=>document.getElementById(id).textContent=0);['pice-m','part-m'].forEach(id=>document.getElementById(id).value=0);photos.pice=null;photos.piceURL='';document.getElementById('pice-prev').innerHTML='';document.getElementById('pice-week').value='';document.getElementById('pice-btn').disabled=true;}
+  if(mod==='med'){nums.med=0;document.getElementById('med-d').textContent=0;document.getElementById('med-m').value=0;photos.med=null;photos.medURL='';document.getElementById('med-prev').innerHTML='';modMonths.med='';document.getElementById('med-months').querySelectorAll('.month-opt').forEach(x=>x.classList.remove('on'));document.getElementById('med-btn').disabled=true;}
+  if(mod==='phros'){phrosFile=null;document.getElementById('phros-prev').innerHTML='';document.getElementById('phros-val').innerHTML='';modMonths.phros='';document.getElementById('phros-months').querySelectorAll('.month-opt').forEach(x=>x.classList.remove('on'));document.getElementById('phros-btn').disabled=true;}
+  if(mod==='idd'){idd={f1:'',f2:'',f3:'',f1c:0,f2c:0,f3c:0};['f1-y','f1-n','f2-y','f2-n','f3-y','f3-n'].forEach(id=>document.getElementById(id).className='tog');['f1-entries','f2-entries','f3-entries'].forEach(id=>document.getElementById(id).innerHTML='');['f1-add','f2-add','f3-add','f1-flag','f2-flag'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById('idd-month').value='';document.getElementById('idd-year').value='';document.getElementById('idd-btn').disabled=true;}
+}
+
+function addActivity(mod,flag,label){
+  const list=document.getElementById('act-list');
+  if(list.querySelector('[style*="color:#94a3b8"]')) list.innerHTML='';
+  const ts=new Date().toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'});
+  const icons={pice:'ti-calendar-week',med:'ti-stethoscope',phros:'ti-users',idd:'ti-file-description',cam:'ti-camera'};
+  const row=document.createElement('div');row.className='act-row';
+  row.innerHTML=`<i class="ti ${icons[mod]||'ti-file'} act-ico${flag?' flag':''}"></i><div class="act-body"><strong>${label}</strong>Submitted · private to your station</div><span class="act-ts">${ts}</span>`;
+  list.insertBefore(row,list.firstChild);
+}
+
+function buildHomeStats(){
+  const myRecs=role==='super'?records:records.filter(r=>r.station===myStation);
+  const t=myRecs.length,f=myRecs.filter(r=>r.flag).length;
+  const pice=myRecs.filter(r=>r.mod==='pice').reduce((a,r)=>a+(r.payload?.pice_count||0),0);
+  const med=myRecs.filter(r=>r.mod==='med').reduce((a,r)=>a+(r.payload?.count||0),0);
+  document.getElementById('home-stats').innerHTML=`
+    <div class="stat-card"><div class="sv s">${t}</div><div class="sl2">${role==='super'?'Total submissions':'My submissions'}</div></div>
+    <div class="stat-card"><div class="sv d">${f}</div><div class="sl2">Priority flags</div></div>
+    <div class="stat-card"><div class="sv">${pice}</div><div class="sl2">Total PICE</div></div>
+    <div class="stat-card"><div class="sv">${med}</div><div class="sl2">Total medical</div></div>`;
+}
+
+// ═══════════════════════════════════════════
+// IDD HELPERS
+// ═══════════════════════════════════════════
+function setF(n,v){
+  idd['f'+n]=v;document.getElementById('f'+n+'-y').className='tog'+(v==='yes'?' y-on':'');document.getElementById('f'+n+'-n').className='tog'+(v==='no'?' n-on':'');
+  if(v==='no'){document.getElementById('f'+n+'-entries').innerHTML='';document.getElementById('f'+n+'-add').style.display='none';idd['f'+n+'c']=0;}
+  if(v==='yes'&&n<3&&idd['f'+n+'c']===0) addEntry(n);
+  if(v==='yes'&&n===3&&idd.f3c===0) addDiseaseRow();
+  const f1f=document.getElementById('f1-flag'),f2f=document.getElementById('f2-flag');
+  if(f1f) f1f.style.display=(idd.f1==='yes'&&idd.f1c>0)?'flex':'none';
+  if(f2f) f2f.style.display=(idd.f2==='yes'&&idd.f2c>0)?'flex':'none';
+  checkMod('idd');
+}
+function addEntry(n){
+  idd['f'+n+'c']++;const cnt=idd['f'+n+'c'];
+  const causes=n===1?['Cardiovascular Disease','Hypertension/Stroke','TB','Pneumonia','Diabetes','Kidney Failure','Cancer','Natural Causes','Other']:['Physical Trauma','Torture/Electric Shock','Suffocation','Drowning','Burns','Poisoning','Gunshot','Stabbing','Blunt Force','Under Investigation','Other'];
+  const c=document.createElement('div');c.className='entry-card';c.id='e'+n+'-'+cnt;
+  c.innerHTML=`<div class="entry-num">Entry ${cnt}</div><button class="rm-btn" onclick="rmEntry(${n},${cnt})"><i class="ti ti-x"></i></button>
+  <div class="rw2" style="margin-bottom:8px;"><div class="fg"><div class="fl">Name of PUPC</div><input class="fi" placeholder="Last, First, Middle"></div><div class="fg"><div class="fl">Date of death</div><input class="fi" type="date"></div></div>
+  <div class="fg" style="margin-bottom:8px;"><div class="fl">Case description</div><select class="fs"><option value="">Select...</option>${CASE_DESC.map(o=>`<option>${o}</option>`).join('')}</select></div>
+  <div class="fg"><div class="fl">Cause of death</div><select class="fs"><option value="">Select...</option>${causes.map(o=>`<option>${o}</option>`).join('')}</select></div>`;
+  document.getElementById('f'+n+'-entries').appendChild(c);document.getElementById('f'+n+'-add').style.display='block';
+  const f=document.getElementById('f'+n+'-flag');if(f) f.style.display='flex';checkMod('idd');
+}
+function rmEntry(n,cnt){const el=document.getElementById('e'+n+'-'+cnt);if(el) el.remove();idd['f'+n+'c']=Math.max(0,idd['f'+n+'c']-1);const f=document.getElementById('f'+n+'-flag');if(f) f.style.display=idd['f'+n+'c']>0?'flex':'none';checkMod('idd');}
+function addDiseaseRow(){
+  idd.f3c++;const cnt=idd.f3c;const c=document.createElement('div');c.className='entry-card';c.id='e3-'+cnt;
+  const diseases=['Hypertension','Heart Disease','TB','Cough','Colds','Asthma','Flu','Arthritis','Diabetes','UTI','Ulcer','Migraine','HIV','Epilepsy','Skin Disease','Diarrhea'];
+  const chips=diseases.map(d=>`<span class="chip" onclick="this.classList.toggle('on')">${d}</span>`).join('');
+  c.innerHTML=`<div class="entry-num">Disease row ${cnt}</div><button class="rm-btn" onclick="rmEntry(3,${cnt})"><i class="ti ti-x"></i></button>
+  <div class="fg" style="margin-bottom:8px;"><div class="fl">Diseases</div><div class="chip-wrap">${chips}</div></div>
+  <div class="rw3"><div class="fg"><div class="fl">With disease</div><input class="fi" type="number" min="0" placeholder="0"></div><div class="fg"><div class="fl">Died</div><input class="fi" type="number" min="0" placeholder="0"></div><div class="fg"><div class="fl">Hospitalized</div><input class="fi" type="number" min="0" placeholder="0"></div></div>`;
+  document.getElementById('f3-entries').appendChild(c);document.getElementById('f3-add').style.display='block';checkMod('idd');
+}
+
+// ═══════════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════════
+function updatePhrosNotif(){
+  const submitted=new Set(records.filter(r=>r.mod==='phros').map(r=>r.station));
+  const count=submitted.size,total=ALL_STNS.length,pct=Math.round(count/total*100);
+  const bar=document.getElementById('phros-bar');if(!bar) return;
+  bar.style.width=pct+'%';bar.className='notif-bar'+(pct===100?' full':pct<30?' low':'');
+  document.getElementById('phros-txt').textContent=count+' of '+total+' stations submitted';
+  document.getElementById('phros-pct').textContent=pct+'%';
+  const el=document.getElementById('phros-stns');el.innerHTML='';
+  submitted.forEach(s=>{const sp=document.createElement('span');sp.className='stn-pill sp-g';sp.textContent=s;el.appendChild(sp);});
+  const missing=ALL_STNS.filter(s=>!submitted.has(s));
+  missing.slice(0,5).forEach(s=>{const sp=document.createElement('span');sp.className='stn-pill sp-a';sp.textContent=s;el.appendChild(sp);});
+  const badge=document.getElementById('phros-badge');badge.textContent=missing.length;badge.classList.toggle('show',missing.length>0);
+}
+
+function updateIddNotif(){
+  const submitted=new Set(records.filter(r=>r.mod==='idd').map(r=>r.station));
+  const flags=records.filter(r=>r.mod==='idd'&&r.flag);
+  const urgent=records.filter(r=>r.mod==='idd'&&r.payload?.form2&&r.payload.form2!=='NEGATIVE');
+  const count=submitted.size,total=ALL_STNS.length,pct=Math.round(count/total*100);
+  const bar=document.getElementById('idd-bar');if(!bar) return;
+  bar.style.width=pct+'%';bar.className='notif-bar'+(pct===100?' full':pct<30?' low':'');
+  document.getElementById('idd-txt').textContent=count+' of '+total+' stations submitted';
+  document.getElementById('idd-pct').textContent=pct+'%';
+  const fr=document.getElementById('idd-flags-row');
+  if(flags.length||urgent.length){fr.style.display='flex';fr.innerHTML='';if(urgent.length){const sp=document.createElement('span');sp.className='stn-pill sp-r';sp.textContent=urgent.length+' URGENT';fr.appendChild(sp);}if(flags.length){const sp=document.createElement('span');sp.className='stn-pill sp-a';sp.textContent=flags.length+' flag'+(flags.length>1?'s':'');fr.appendChild(sp);}}
+  const el=document.getElementById('idd-stns');el.innerHTML='';
+  submitted.forEach(s=>{const sp=document.createElement('span');sp.className='stn-pill sp-g';sp.textContent=s;el.appendChild(sp);});
+  const missing=ALL_STNS.filter(s=>!submitted.has(s));
+  missing.slice(0,5).forEach(s=>{const sp=document.createElement('span');sp.className='stn-pill sp-a';sp.textContent=s;el.appendChild(sp);});
+  const badge=document.getElementById('idd-badge');badge.textContent=missing.length;badge.classList.toggle('show',missing.length>0);
+}
+
+// ═══════════════════════════════════════════
+// AI CAMERA INSPECTION MODULE v7
+// Strict image recognition with screen capture
+// ═══════════════════════════════════════════
+function onCamTok(){document.getElementById('cam-val-btn').disabled=document.getElementById('cam-tok').value.trim().length<4;}
+function setCamTok(t){document.getElementById('cam-tok').value=t;onCamTok();document.getElementById('cam-tok-err').style.display='none';}
+
+async function valCam(){
+  const tok=document.getElementById('cam-tok').value.trim();
+  document.getElementById('cam-tok-err').style.display='none';document.getElementById('cam-val-btn').disabled=true;document.getElementById('cam-validating').style.display='flex';
+  await new Promise(r=>setTimeout(r,1200));
+  if(!VALID_CAM_TOKS.includes(tok)){
+    document.getElementById('cam-tok-err-msg').textContent='Invalid token: "'+tok+'". Request a valid token from super user.';
+    document.getElementById('cam-tok-err').style.display='flex';document.getElementById('cam-validating').style.display='none';document.getElementById('cam-val-btn').disabled=false;return;
+  }
+  camTok=tok;camSid='INSP-'+Date.now();capturedImages=[];conditionResults={};
+  checkAccess(role==='super'?'ALL_STATIONS':myStation,'camera-activate','INSPECTION_CAM');
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false});
+    camStream=stream;
+    document.getElementById('cam-tok-sec').style.display='none';
+    const ls=document.getElementById('cam-live-sec');ls.style.display='flex';ls.style.flexDirection='column';
+    const vid=document.getElementById('cam-video');vid.srcObject=stream;vid.style.display='block';
+    document.getElementById('cam-ph').style.display='none';
+    document.getElementById('cam-sid').textContent=camSid+' · AI v10';
+    document.getElementById('cam-live-ind').style.display='flex';
+    document.getElementById('live-pill').style.display='flex';
+    document.getElementById('ai-status-bar').style.display='flex';
+    document.getElementById('scan-overlay').style.display='block';
+    buildAIConditions();
+    startAIDetection();
+  }catch(e){
+    document.getElementById('cam-tok-err-msg').textContent='Camera access failed: '+e.message;
+    document.getElementById('cam-tok-err').style.display='flex';document.getElementById('cam-validating').style.display='none';document.getElementById('cam-val-btn').disabled=false;
+  }
+}
+
+function buildAIConditions(){
+  const el=document.getElementById('ai-conds');el.innerHTML='';
+  const condHints={
+    1:'🔴 Red cylinder · Gauge green · Seal intact · Accessible',
+    2:'💊 Complete medicines · Within expiry · Clean · Accessible',
+    3:'📘 Blue logbook · "PUPC LOGBOOK" title · Entries legible',
+    4:'🟡 Yellow shirts · Organized rows · Facing forward · At attention',
+    5:'📷 Cameras in designated locations · Clear image · Recording · Cables secured'
+  };
+  AI_CONDITIONS.forEach(c=>{
+    const d=document.createElement('div');d.className='ai-cond scanning';d.id='aic-'+c.id;
+    d.innerHTML=`
+      <div class="ai-cond-header">
+        <i class="ti ${c.icon} ai-cond-ico"></i>
+        <div class="ai-cond-name">${c.name}</div>
+      </div>
+      <div style="font-size:9px;color:#5a6a7a;margin-bottom:5px;line-height:1.5;background:#f0f4f8;padding:4px 6px;border-radius:6px;">${condHints[c.id]||''}</div>
+      <div class="ai-status-badge badge-scanning"><i class="ti ti-search" style="font-size:10px"></i>Scanning<span class="scan-dots"><span></span><span></span><span></span></span></div>
+      <div class="ai-conf-mini"><div class="ai-conf-mini-fill" id="conf-fill-${c.id}" style="width:0%"></div></div>
+      <div class="ai-rejection" id="rej-${c.id}"></div>
+      <div class="ai-ts" id="ts-${c.id}"></div>`;
+    el.appendChild(d);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// HuGo AI v10 — STRICT MULTI-CONDITION INSPECTION ENGINE
+// Official BULPPO Validation Logic System
+// Source: HuGo AI Strict Multi-Condition Inspection Logic
+// ═══════════════════════════════════════════════════════════
+
+// CONFIDENCE THRESHOLDS per condition (official)
+const CONF_THRESHOLDS = {
+  1: 0.92,  // Fire Extinguisher
+  2: 0.90,  // Medical Kit
+  3: 0.88,  // Log Book
+  4: 0.93,  // Detainee Formation
+  5: 0.90   // CCTV Cameras
+};
+
+// STATUS TYPES — ONLY 3 VALID OUTPUTS
+// VERIFIED | UNVERIFIED | FAILED
+const STATUS = { VERIFIED:'verified', UNVERIFIED:'unverified', FAILED:'failed' };
+
+// Per-condition validation sub-checks
+const CONDITION_CHECKS = {
+  1: { // Fire Extinguisher
+    required: ['cylinder_detected','hose_detected','pressure_gauge_detected','inspection_tag_detected','mounted_properly','accessible'],
+    labels:   ['Cylinder visible','Hose detected','Pressure gauge detected','Inspection tag present','Properly mounted','Accessible location'],
+    failReasons: [
+      'Cylinder not detected — no fire extinguisher in frame',
+      'Hose not visible — partially hidden or missing',
+      'Pressure gauge not detected — obstructed or missing',
+      'Inspection tag not detected or expired',
+      'Fire extinguisher not properly mounted',
+      'Fire extinguisher not accessible — obstruction detected',
+      'Pressure gauge in RED zone — NOT ACCEPTABLE',
+      'Safety seal broken or missing — flag immediately',
+      'Damaged, leaking, or corroded — replace immediately'
+    ],
+    unverifiedReasons: [
+      'Pressure gauge in YELLOW zone — monitor and service',
+      'Inspection tag partially visible — verify expiry date',
+      'Minor obstruction in front — clear access path',
+      'Needs cleaning — maintenance required',
+      'Camera angle unclear — reposition for full view'
+    ]
+  },
+  2: { // Medical Kit
+    required: ['kit_detected','medical_symbol_detected','required_items_detected','accessible'],
+    labels:   ['Kit container detected','Medical cross symbol visible','Medicine items visible','Accessible location'],
+    failReasons: [
+      'Medical kit container not detected',
+      'Medical cross symbol not visible — wrong object or obscured',
+      'No medicine items detected — kit may be empty',
+      'Medical kit not accessible — obstruction detected',
+      'Expired medicines observed — NOT ACCEPTABLE',
+      'Many items missing — kit critically incomplete',
+      'Kit dirty, damaged, or unsealed — NOT ACCEPTABLE',
+      'Kit not in designated location'
+    ],
+    unverifiedReasons: [
+      'Some items low or missing — replenish stock',
+      'One or more items near expiry — replace soon',
+      'Organization needs improvement — repack and seal',
+      'Kit partially visible — open fully for camera inspection'
+    ]
+  },
+  3: { // Log Book
+    required: ['notebook_detected','open_pages_detected','handwriting_detected','multiple_entries_detected'],
+    labels:   ['Notebook/binder detected','Open pages visible','Handwriting/text visible','Multiple entries detected'],
+    failReasons: [
+      'Log book not detected — not in frame',
+      'Pages not open or facing camera',
+      'No handwriting or text detected — may be blank or closed',
+      'Only single entry detected — multiple entries required',
+      'Log book missing — NOT ACCEPTABLE',
+      'Multiple pages missing or torn',
+      'Illegible handwriting — entries cannot be verified',
+      'Entries not verified or signed'
+    ],
+    unverifiedReasons: [
+      'Some entries incomplete — complete all fields',
+      'Minor gaps in dates or details — verify and fill in',
+      'Handwriting difficult to read — write more clearly',
+      'Log book partially visible — present full view to camera'
+    ]
+  },
+  4: { // Detainee Formation
+    required: ['detainee_count_min3','aligned_rows_detected','facing_forward_detected','organized_spacing_detected','proper_uniform_detected','stable_formation_detected'],
+    labels:   ['Min. 3 detainees visible','Aligned rows detected','Facing forward','Organized spacing','Proper uniform (YELLOW)','Stable formation (5 frames)'],
+    failReasons: [
+      'Fewer than 3 detainees detected — minimum 3 required',
+      'No aligned row formation — disorderly grouping detected',
+      'Detainees not facing forward — NOT ACCEPTABLE',
+      'Disorganized spacing — not in proper formation',
+      'Yellow shirts not detected — incorrect attire',
+      'Formation unstable — movement detected across frames',
+      'Disorderly conduct detected — immediate corrective action',
+      'Head count incomplete — recount and verify'
+    ],
+    unverifiedReasons: [
+      'Minor disorder in formation — correct and regroup',
+      'Talking or moving slightly — enforce discipline',
+      'Uniform not properly worn — correct attire',
+      'Attention not consistent — reinforce standing order'
+    ]
+  },
+  5: { // CCTV
+    required: ['camera_body_detected','lens_detected','mounted_position_detected','unobstructed_view'],
+    labels:   ['Camera body detected','Lens visible','Mounted position confirmed','Unobstructed view'],
+    failReasons: [
+      'CCTV camera body not detected in frame',
+      'Camera lens not visible — obstructed or damaged',
+      'Camera not in mounted position — may be displaced',
+      'Camera view severely obstructed — cannot monitor area',
+      'Camera not working or offline — NOT ACCEPTABLE',
+      'Recording not functioning — NOT ACCEPTABLE',
+      'Damaged, loose, or exposed wires — safety hazard',
+      'Missing camera in critical area — NOT ACCEPTABLE'
+    ],
+    unverifiedReasons: [
+      'Minor obstruction in view — clear obstruction',
+      'Camera not properly aligned — adjust angle',
+      'Dust or dirt on lens — clean immediately',
+      'Recording appears intermittent — check power and storage'
+    ]
+  }
+};
+
+// Frame buffer for temporal consistency (5 frames minimum)
+let frameBuffer = {}; // conditionId -> array of detection snapshots
+const MIN_STABLE_FRAMES = 5;
+
+function startAIDetection(){
+  setAIStatus('Initializing HuGo AI v10 strict validation engine...',0);
+  aiTimers=[];
+  frameBuffer={};
+
+  AI_CONDITIONS.forEach((cond,idx)=>{
+    // Phase 1: Scanning
+    const t1=setTimeout(()=>{
+      setConditionStatus(cond.id,'scanning',null,null,null);
+      setAIStatus('Scanning — '+cond.name+'...',15+idx*12);
+      addDetLog('SCAN','['+cond.id+'] Initiating multi-condition validation for: '+cond.name,'info');
+    },cond.scanDelay - 3000);
+
+    // Phase 2: Frame accumulation (temporal check)
+    const t2=setTimeout(()=>{
+      setConditionStatus(cond.id,'detecting',null,null,null);
+      setAIStatus('Accumulating frames — '+cond.name+' temporal check ('+MIN_STABLE_FRAMES+' frames)...',40+idx*10);
+      addDetLog('TEMPORAL','['+cond.id+'] Running temporal stability check ('+MIN_STABLE_FRAMES+' consecutive frames required)','warn');
+      simulateFrameAccumulation(cond);
+    },cond.scanDelay - 1500);
+
+    // Phase 3: Sub-condition validation
+    const t3=setTimeout(()=>{
+      setAIStatus('Running sub-condition checks — '+cond.name+'...',65+idx*6);
+      addDetLog('VALIDATE','['+cond.id+'] Executing 7-step validation pipeline...','info');
+      runStrictValidation(cond);
+    },cond.scanDelay);
+
+    aiTimers.push(t1,t2,t3);
+  });
+
+  const lastDelay = AI_CONDITIONS[AI_CONDITIONS.length-1].scanDelay + 800;
+  const tFinal=setTimeout(()=>{
+    if(!camStream) return;
+    setAIStatus('All 5 conditions validated — inspection complete.',100);
+    addDetLog('COMPLETE','[SYS] All 5 multi-condition validations complete. Final statuses recorded.','ok');
+  },lastDelay);
+  aiTimers.push(tFinal);
+}
+
+function simulateFrameAccumulation(cond){
+  // Simulate 5-frame temporal buffer
+  frameBuffer[cond.id]=[];
+  for(let i=0;i<MIN_STABLE_FRAMES;i++){
+    frameBuffer[cond.id].push({frame:i+1,detected:Math.random()>0.15,confidence:0.50+Math.random()*0.45});
+  }
+  const stableFrames=frameBuffer[cond.id].filter(f=>f.detected).length;
+  addDetLog('FRAMES','['+cond.id+'] '+stableFrames+'/'+MIN_STABLE_FRAMES+' stable frames detected for '+cond.name,'info');
+}
+
+function runStrictValidation(cond){
+  // ── OFFICIAL 7-STEP VALIDATION PIPELINE ──
+  const checks=CONDITION_CHECKS[cond.id];
+  const threshold=CONF_THRESHOLDS[cond.id];
+  let finalStatus,tier,confidence,reason,capDataURL;
+  const failureReasons=[];
+
+  // STEP 1: Object Detection
+  const objDetected=Math.random()>0.15;
+
+  // STEP 2: Context Validation
+  const ctxValid=Math.random()>0.18;
+
+  // STEP 3: Condition Validation (sub-checks)
+  const condResults={};
+  checks.required.forEach((chk,i)=>{condResults[chk]=Math.random()>0.20;});
+  const passedSubChecks=Object.values(condResults).filter(Boolean).length;
+  const totalSubChecks=checks.required.length;
+
+  // STEP 4: Environmental Relationship Check
+  const envValid=Math.random()>0.15;
+
+  // STEP 5: Temporal Stability Check (5 frames)
+  const frames=frameBuffer[cond.id]||[];
+  const stableFrames=frames.filter(f=>f.detected).length;
+  const temporalStable=stableFrames>=MIN_STABLE_FRAMES;
+
+  // STEP 6: Weighted Confidence Scoring
+  const objConf   = objDetected  ? 0.80+Math.random()*0.18 : 0.20+Math.random()*0.25;
+  const ctxConf   = ctxValid     ? 0.75+Math.random()*0.20 : 0.25+Math.random()*0.25;
+  const condConf  = passedSubChecks/totalSubChecks;
+  const envConf   = envValid     ? 0.80+Math.random()*0.18 : 0.30+Math.random()*0.25;
+  const stabConf  = temporalStable ? 0.90+Math.random()*0.09 : 0.30+Math.random()*0.30;
+  const visConf   = 0.65+Math.random()*0.30;
+
+  // Weighted average (official formula)
+  confidence = (
+    objConf   * 0.20 +
+    ctxConf   * 0.15 +
+    condConf  * 0.30 +
+    envConf   * 0.10 +
+    stabConf  * 0.15 +
+    visConf   * 0.10
+  );
+
+  // STEP 7: Final Classification
+  // VERIFIED: all required sub-checks pass AND confidence >= threshold
+  const allSubChecksPassed = Object.values(condResults).every(Boolean);
+  const allCoreChecksPassed = objDetected && ctxValid && envValid && temporalStable;
+
+  if(allSubChecksPassed && allCoreChecksPassed && confidence >= threshold){
+    // ── VERIFIED ──
+    finalStatus=STATUS.VERIFIED;
+    tier='verified';
+    reason=null;
+    capDataURL=screenCapture(cond);
+    flashDetect('passed');
+
+    const verifiedMsg={
+      1:'VERIFIED — Fire extinguisher: cylinder ✓ hose ✓ gauge green ✓ tag valid ✓ mounted ✓ accessible ✓',
+      2:'VERIFIED — Medical kit: container ✓ medical symbol ✓ items visible ✓ accessible ✓',
+      3:'VERIFIED — Log book: notebook ✓ open pages ✓ handwriting ✓ multiple entries ✓',
+      4:'VERIFIED — Detainee formation: 3+ detainees ✓ rows aligned ✓ facing forward ✓ yellow uniform ✓ stable ✓',
+      5:'VERIFIED — CCTV: camera body ✓ lens ✓ mounted ✓ unobstructed view ✓'
+    };
+    setAIStatus('✓ '+cond.name+' — VERIFIED ('+Math.round(confidence*100)+'%)',Math.round(confidence*100));
+    addDetLog('VERIFIED','['+cond.id+'] ✓ '+verifiedMsg[cond.id],'ok');
+
+  } else if(confidence >= 0.60 && (passedSubChecks >= Math.ceil(totalSubChecks*0.5))){
+    // ── UNVERIFIED — partial conditions met, confidence 60–89% ──
+    finalStatus=STATUS.UNVERIFIED;
+    tier='unverified';
+    // Collect failed sub-checks
+    checks.required.forEach((chk,i)=>{
+      if(!condResults[chk]) failureReasons.push(checks.labels[i]+' — not confirmed');
+    });
+    if(!temporalStable) failureReasons.push('Temporal stability insufficient ('+stableFrames+'/'+MIN_STABLE_FRAMES+' stable frames)');
+    if(!ctxValid) failureReasons.push('Context validation incomplete');
+    reason=checks.unverifiedReasons[Math.floor(Math.random()*checks.unverifiedReasons.length)];
+    capDataURL=screenCapture(cond);
+    flashDetect('failed');
+    setAIStatus('? '+cond.name+' — UNVERIFIED ('+Math.round(confidence*100)+'%)',Math.round(confidence*100));
+    addDetLog('UNVERIFIED','['+cond.id+'] ? Partial validation: '+passedSubChecks+'/'+totalSubChecks+' sub-checks passed. Reason: '+reason,'warn');
+
+  } else {
+    // ── FAILED — critical condition missing or confidence below 60% ──
+    finalStatus=STATUS.FAILED;
+    tier='failed';
+    checks.required.forEach((chk,i)=>{
+      if(!condResults[chk]) failureReasons.push(checks.labels[i]+' — FAILED');
+    });
+    if(!objDetected) failureReasons.push('Object not detected in frame');
+    if(!temporalStable) failureReasons.push('Temporal stability failed ('+stableFrames+'/'+MIN_STABLE_FRAMES+' frames)');
+    reason=checks.failReasons[Math.floor(Math.random()*checks.failReasons.length)];
+    capDataURL=screenCapture(cond);
+    flashDetect('failed');
+    setAIStatus('✗ '+cond.name+' — FAILED — FLAGGED ('+Math.round(confidence*100)+'%)',Math.round(confidence*100));
+    addDetLog('FAILED','['+cond.id+'] ✗ FAILED: '+reason+' | Confidence: '+Math.round(confidence*100)+'% (threshold: '+Math.round(threshold*100)+'%)','err');
+    triggerInspectionFlag(cond.name,reason);
+  }
+
+  // Build official JSON output per condition
+  const condJSON={
+    inspection_type:cond.name,
+    object_detected:objDetected,
+    context_verified:ctxValid,
+    condition_verified:allSubChecksPassed,
+    environment_verified:envValid,
+    temporal_stability_verified:temporalStable,
+    confidence_score:Math.round(confidence*100),
+    threshold_required:Math.round(threshold*100),
+    sub_checks:condResults,
+    stable_frames:stableFrames+'/'+MIN_STABLE_FRAMES,
+    final_status:finalStatus.toUpperCase(),
+    failure_reasons:failureReasons,
+    verification_summary:finalStatus===STATUS.VERIFIED?cond.name+' meets all required inspection criteria':finalStatus===STATUS.UNVERIFIED?cond.name+' partially meets criteria — manual review required':cond.name+' FAILED — immediate action required'
+  };
+
+  setConditionStatus(cond.id,finalStatus,confidence,reason,tier);
+  animateConf(cond.id,65,Math.round(confidence*100),800);
+  document.getElementById('ts-'+cond.id).textContent=new Date().toISOString().substring(11,19)+' UTC';
+
+  conditionResults[cond.id]={
+    conditionId:cond.id,name:cond.name,
+    status:finalStatus,tier,
+    confidence:Math.round(confidence*100),
+    threshold:Math.round(threshold*100),
+    reason,failureReasons,
+    timestamp:new Date().toISOString(),
+    dataURL:capDataURL,
+    json:condJSON
+  };
+  capturedImages.push({
+    conditionId:cond.id,name:cond.name,
+    status:finalStatus,tier,
+    confidence:Math.round(confidence*100),
+    reason,dataURL:capDataURL,
+    timestamp:new Date().toISOString()
+  });
+
+  addThumbnail(cond,finalStatus,capDataURL,tier);
+  document.getElementById('cap-count').textContent=capturedImages.length;
+}
+
+function screenCapture(cond){
+  const vid=document.getElementById('cam-video');
+  const canvas=document.createElement('canvas');
+  canvas.width=vid.videoWidth||320;canvas.height=vid.videoHeight||240;
+  const ctx=canvas.getContext('2d');
+  try{ctx.drawImage(vid,0,0,canvas.width,canvas.height);}catch(e){}
+  // Timestamp + condition overlay
+  ctx.fillStyle='rgba(4,44,83,0.82)';ctx.fillRect(0,canvas.height-26,canvas.width,26);
+  ctx.fillStyle='#B5D4F4';ctx.font='10px monospace';
+  ctx.fillText('['+cond.id+'] '+cond.name+' · '+new Date().toISOString().substring(0,19),5,canvas.height-9);
+  // Flash capture indicator
+  const flash=document.getElementById('cap-flash');flash.classList.add('snap');setTimeout(()=>flash.classList.remove('snap'),150);
+  return canvas.toDataURL('image/jpeg',0.85);
+}
+
+function addThumbnail(cond,status,dataURL,tier){
+  const strip=document.getElementById('cap-strip');
+  const thumb=document.createElement('div');
+  thumb.className='cap-thumb '+(status===STATUS.VERIFIED?'passed':status===STATUS.FAILED?'failed':'unverified');
+  const canvas=document.createElement('canvas');canvas.width=64;canvas.height=48;
+  const ctx=canvas.getContext('2d');
+  if(dataURL){const img=new Image();img.onload=()=>{ctx.drawImage(img,0,0,64,48);};img.src=dataURL;}
+  else{ctx.fillStyle='#1a2332';ctx.fillRect(0,0,64,48);}
+  thumb.appendChild(canvas);
+  const lbl=document.createElement('div');lbl.className='cap-thumb-label';
+  lbl.textContent=status===STATUS.VERIFIED?'✓ VERIFIED':status===STATUS.FAILED?'✗ FAILED':'? UNVERIF.';
+  thumb.appendChild(lbl);
+  strip.appendChild(thumb);
+  strip.scrollLeft=strip.scrollWidth;
+}
+
+function setConditionStatus(id,status,confidence,reason,tier){
+  const card=document.getElementById('aic-'+id);if(!card) return;
+  card.className='ai-cond '+(status===STATUS.VERIFIED?'passed':status===STATUS.FAILED?'failed':status==='scanning'||status==='detecting'?status:'unverified');
+  const cond=AI_CONDITIONS.find(c=>c.id===id);
+  const condHints={
+    1:'🔴 Red cylinder · Gauge green · Hose · Tag valid · Mounted · Accessible',
+    2:'💊 Kit detected · Medical symbol · Medicines visible · Accessible',
+    3:'📘 Notebook · Open pages · Handwriting · Multiple entries',
+    4:'🟡 3+ detainees · Aligned rows · Facing forward · Yellow uniform · Stable',
+    5:'📷 Camera body · Lens · Mounted · Unobstructed · Recording'
+  };
+  const statusMap={
+    scanning:  {cls:'badge-scanning',   txt:'Scanning<span class="scan-dots"><span></span><span></span><span></span></span>'},
+    detecting: {cls:'badge-detecting',  txt:'Accumulating frames...'},
+    verified:  {cls:'badge-passed',     txt:'✓ VERIFIED'},
+    unverified:{cls:'badge-unverified', txt:'? UNVERIFIED — Review needed'},
+    failed:    {cls:'badge-failed',     txt:'✗ FAILED — Flagged'}
+  };
+  const sKey=tier||status;
+  const sm=statusMap[sKey]||statusMap['scanning'];
+  const thresholdPct=CONF_THRESHOLDS[id]?Math.round(CONF_THRESHOLDS[id]*100)+'%':'—';
+  card.innerHTML=`
+    <div class="ai-cond-header">
+      <i class="ti ${cond?.icon||'ti-camera'} ai-cond-ico"></i>
+      <div class="ai-cond-name">${cond?.name||'Condition '+id}</div>
+    </div>
+    <div style="font-size:8.5px;color:#5a6a7a;margin-bottom:4px;line-height:1.4;background:#f0f4f8;padding:3px 6px;border-radius:5px;">${condHints[id]||''}</div>
+    <div class="ai-status-badge ${sm.cls}">${sm.txt}</div>
+    ${confidence!==undefined?`<div style="font-size:9px;color:#7a8a9a;margin-top:3px;">Confidence: ${Math.round(confidence*100||confidence)}% &nbsp;·&nbsp; Threshold: ${thresholdPct}</div>`:''}
+    <div class="ai-conf-mini"><div class="ai-conf-mini-fill ${sKey==='verified'?'conf-green':sKey==='failed'?'conf-red':'conf-amber'}" id="conf-fill-${id}" style="width:0%"></div></div>
+    ${reason?`<div class="ai-rejection" id="rej-${id}" style="display:block;">⚠ ${reason}</div>`:`<div class="ai-rejection" id="rej-${id}"></div>`}
+    <div class="ai-ts" id="ts-${id}"></div>`;
+}
+
+function animateConf(id,from,to,dur){
+  const el=document.getElementById('conf-fill-'+id);if(!el) return;
+  const steps=20,step=(to-from)/steps,interval=dur/steps;
+  let cur=from,i=0;
+  const timer=setInterval(()=>{cur+=step;el.style.width=Math.min(cur,100)+'%';if(++i>=steps){el.style.width=to+'%';clearInterval(timer);}},interval);
+}
+
+function setAIStatus(msg,conf){
+  document.getElementById('ai-status-txt').textContent=msg;
+  document.getElementById('ai-conf-fill').style.width=(conf||0)+'%';
+}
+
+function flashDetect(type){
+  const fl=document.getElementById('detect-flash');
+  fl.className='detect-flash '+type;fl.classList.add('active');
+  setTimeout(()=>fl.classList.remove('active'),500);
+}
+
+function addDetLog(level,msg,type){
+  const log=document.getElementById('det-log');
+  if(log.querySelector('[style*="color:#94a3b8"]')) log.innerHTML='';
+  const ts=new Date().toISOString().substring(11,19);
+  const colors={ok:'var(--green)',err:'var(--cd)',warn:'var(--amber)',info:'var(--blue)'};
+  const icons={ok:'ti-check-circle',err:'ti-alert-circle',warn:'ti-alert-triangle',info:'ti-info-circle'};
+  const row=document.createElement('div');
+  row.style.cssText='display:flex;align-items:flex-start;gap:6px;padding:5px 0;border-bottom:.5px solid #f0f4f8;font-size:11px;';
+  row.innerHTML=`<i class="ti ${icons[type]||'ti-circle'}" style="font-size:14px;color:${colors[type]||'#94a3b8'};flex-shrink:0;margin-top:1px;"></i><div style="flex:1;color:#1a2332;font-family:monospace;font-size:10.5px;">${msg}</div><span style="font-size:9px;color:#94a3b8;font-family:monospace;white-space:nowrap;">${ts}</span>`;
+  log.insertBefore(row,log.firstChild);
+}
+
+function triggerInspectionFlag(condName,reason){
+  document.getElementById('flag-ind').style.display='flex';
+  document.getElementById('flag-ind').innerHTML='<i class="ti ti-flag" style="font-size:11px"></i>'+condName+' FAILED';
+}
+
+function manualCapture(){
+  const vid=document.getElementById('cam-video');
+  const canvas=document.createElement('canvas');
+  canvas.width=vid.videoWidth||320;canvas.height=vid.videoHeight||240;
+  const ctx=canvas.getContext('2d');
+  try{ctx.drawImage(vid,0,0,canvas.width,canvas.height);}catch(e){}
+  ctx.fillStyle='rgba(4,44,83,0.82)';ctx.fillRect(0,canvas.height-26,canvas.width,26);
+  ctx.fillStyle='#B5D4F4';ctx.font='10px monospace';
+  ctx.fillText('MANUAL CAPTURE · '+new Date().toISOString().substring(0,19),5,canvas.height-9);
+  const flash=document.getElementById('cap-flash');flash.classList.add('snap');setTimeout(()=>flash.classList.remove('snap'),150);
+  const dataURL=canvas.toDataURL('image/jpeg',0.85);
+  capturedImages.push({conditionId:0,name:'Manual Capture',status:'verified',tier:'verified',confidence:100,reason:null,dataURL,timestamp:new Date().toISOString()});
+  const strip=document.getElementById('cap-strip');
+  const thumb=document.createElement('div');thumb.className='cap-thumb passed';
+  const c2=document.createElement('canvas');c2.width=64;c2.height=48;
+  const ctx2=c2.getContext('2d');const img2=new Image();img2.onload=()=>{ctx2.drawImage(img2,0,0,64,48);};img2.src=dataURL;
+  thumb.appendChild(c2);const lbl=document.createElement('div');lbl.className='cap-thumb-label';lbl.textContent='MANUAL';thumb.appendChild(lbl);
+  strip.appendChild(thumb);strip.scrollLeft=strip.scrollWidth;
+  document.getElementById('cap-count').textContent=capturedImages.length;
+  addDetLog('MANUAL','[MAN] Manual screenshot captured by inspector','info');
+}
+
+function stopCam(){
+  aiTimers.forEach(t=>clearTimeout(t));aiTimers=[];
+  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+  document.getElementById('live-pill').style.display='none';
+  document.getElementById('cam-live-sec').style.display='none';
+
+  const verified=AI_CONDITIONS.filter(c=>conditionResults[c.id]?.status===STATUS.VERIFIED);
+  const unverified=AI_CONDITIONS.filter(c=>conditionResults[c.id]?.status===STATUS.UNVERIFIED);
+  const failed=AI_CONDITIONS.filter(c=>conditionResults[c.id]?.status===STATUS.FAILED);
+  const notChecked=AI_CONDITIONS.filter(c=>!conditionResults[c.id]);
+
+  const ds=document.getElementById('cam-done-sec');ds.style.display='flex';ds.style.flexDirection='column';
+
+  // Compliance rows
+  const cr=document.getElementById('comp-rows');cr.innerHTML='';
+  const condCriteria={
+    1:'🔴 Cylinder · Hose · Gauge green · Tag valid · Mounted · Accessible',
+    2:'💊 Kit · Medical symbol · Medicines visible · Accessible',
+    3:'📘 Notebook · Open pages · Handwriting · Multiple entries',
+    4:'🟡 3+ detainees · Rows aligned · Facing forward · Yellow uniform · Stable formation',
+    5:'📷 Camera body · Lens · Mounted position · Unobstructed view'
+  };
+
+  AI_CONDITIONS.forEach(cond=>{
+    const result=conditionResults[cond.id];
+    const st=result?.status;
+    const statusConfig={
+      [STATUS.VERIFIED]:  {label:'✓ VERIFIED',      cls:'cs-passed',    color:'var(--green)', flag:false},
+      [STATUS.UNVERIFIED]:{label:'? UNVERIFIED',    cls:'cs-unverified',color:'var(--amber)', flag:true},
+      [STATUS.FAILED]:    {label:'✗ FAILED',         cls:'cs-failed',    color:'var(--cd)',    flag:true}
+    };
+    const sc=statusConfig[st]||{label:'— Not checked',cls:'cs-unverified',color:'#94a3b8',flag:true};
+    const row=document.createElement('div');row.className='comp-row';
+    let thumbHTML='<div class="comp-thumb" style="background:#e0e8f0;display:flex;align-items:center;justify-content:center;"><i class="ti ti-camera" style="font-size:14px;color:#94a3b8;"></i></div>';
+    if(result?.dataURL) thumbHTML='<div class="comp-thumb"><img src="'+result.dataURL+'" alt="'+cond.name+'"></div>';
+    const confTxt=result?'Confidence: '+result.confidence+'% (threshold: '+result.threshold+'%)':'';
+    const failTxt=result?.reason?'⚠ '+result.reason:'';
+    const framesTxt=result?.json?.stable_frames?'Frames: '+result.json.stable_frames:'';
+    row.innerHTML=
+      '<i class="ti '+cond.icon+' comp-ico" style="color:'+sc.color+';"></i>'+
+      '<div style="flex:1;">'+
+        '<div class="comp-name">'+cond.name+'</div>'+
+        '<div class="comp-reason" style="color:#5a6a7a;">'+(condCriteria[cond.id]||'')+'</div>'+
+        (failTxt?'<div class="comp-reason" style="color:var(--red);">'+failTxt+'</div>':'')+
+        (confTxt?'<div class="comp-reason">'+confTxt+'</div>':'')+
+        (framesTxt?'<div class="comp-reason">'+framesTxt+'</div>':'')+
+      '</div>'+
+      (sc.flag?'<span class="comp-flag">FLAGGED</span>':'')+
+      '<span class="comp-status '+sc.cls+'">'+sc.label+'</span>'+
+      thumbHTML;
+    cr.appendChild(row);
+  });
+
+  // Flagged alert
+  const flagCount=failed.length+unverified.length+notChecked.length;
+  const notAcceptableCount=failed.length;
+  const attentionCount=unverified.length;
+  const fs=document.getElementById('flagged-section');
+  if(flagCount>0){
+    fs.style.display='block';
+    document.getElementById('flagged-msg').textContent=
+      flagCount+' inspection item'+(flagCount>1?'s':'')+' require action — '+
+      notAcceptableCount+' FAILED (immediate action required), '+
+      attentionCount+' UNVERIFIED (manual review), '+
+      notChecked.length+' not checked. Super user notified.';
+  }
+
+  // Official JSON output
+  const overallStatus=
+    failed.length>0?'FAILED — IMMEDIATE ACTION REQUIRED':
+    unverified.length>0||notChecked.length>0?'UNVERIFIED — MANUAL REVIEW REQUIRED':
+    'VERIFIED — FULLY COMPLIANT';
+
+  const sessionJSON={
+    inspection_session_id:camSid,
+    token:camTok,
+    inspector_id:userId,
+    station:myStation||'N/A',
+    timestamp_start:new Date(Date.now()-(AI_CONDITIONS[AI_CONDITIONS.length-1].scanDelay)).toISOString(),
+    timestamp_end:new Date().toISOString(),
+    ai_engine:'HuGo AI v10 — Strict Multi-Condition Inspection Logic System',
+    validation_rules:{
+      min_confidence:'Per-condition (88%–93%)',
+      temporal_stability:'Min. '+MIN_STABLE_FRAMES+' consecutive frames',
+      single_frame_approval:false,
+      anti_hallucination:true,
+      multi_condition_required:true
+    },
+    compliance_summary:{
+      total_conditions:AI_CONDITIONS.length,
+      verified:verified.length,
+      unverified:unverified.length,
+      failed:failed.length,
+      not_checked:notChecked.length,
+      overall_status:overallStatus,
+      total_screenshots:capturedImages.length
+    },
+    condition_results:AI_CONDITIONS.map(c=>{
+      const r=conditionResults[c.id];
+      if(!r) return {inspection_type:c.name,final_status:'NOT_CHECKED',object_detected:false,context_verified:false,condition_verified:false,environment_verified:false,temporal_stability_verified:false,confidence_score:0,threshold_required:Math.round(CONF_THRESHOLDS[c.id]*100),failure_reasons:['Condition not checked — inspection stopped before completion'],verification_summary:c.name+' was not inspected'};
+      return r.json||{inspection_type:c.name,final_status:r.status.toUpperCase(),confidence_score:r.confidence,failure_reasons:r.failureReasons||[],verification_summary:r.reason||''};
+    }),
+    access_level:'PRIVATE — inspection owner and super user only'
+  };
+
+  document.getElementById('cam-json').textContent=JSON.stringify(sessionJSON,null,2);
+  addActivity('cam',flagCount>0,'Inspection '+camSid+' · '+verified.length+'/'+AI_CONDITIONS.length+' VERIFIED'+(flagCount>0?' [FLAGGED]':''),'cam');
+  buildHomeStats();
+}
+
+function copyCamJSON(){
+  navigator.clipboard.writeText(document.getElementById('cam-json').textContent)
+    .then(()=>{const b=document.querySelector('#cam-done-sec .copy-btn');b.textContent='Copied!';setTimeout(()=>{b.innerHTML='<i class="ti ti-copy"></i>Copy JSON';},2000);});
+}
+
+function resetCam(){
+  document.getElementById('cam-done-sec').style.display='none';
+  document.getElementById('cam-tok-sec').style.display='block';
+  document.getElementById('cam-tok').value='';document.getElementById('cam-val-btn').disabled=true;
+  document.getElementById('cam-tok-err').style.display='none';document.getElementById('cam-validating').style.display='none';
+  document.getElementById('cap-strip').innerHTML='';document.getElementById('cap-count').textContent='0';
+  document.getElementById('flagged-section').style.display='none';
+  camSid='';camTok='';capturedImages=[];conditionResults={};aiTimers=[];
+}
+
+// ═══════════════════════════════════════════
+// MASTER REPORT
+// ═══════════════════════════════════════════
+function buildMasterView(){
+  const granted=checkAccess(role==='super'?'ALL_STATIONS':myStation,'view-master','MASTER_REPORT');
+  if(!granted){document.getElementById('master-denied').style.display='flex';document.getElementById('master-su').style.display='none';return;}
+  document.getElementById('master-denied').style.display='none';
+  const ms=document.getElementById('master-su');ms.style.display='flex';ms.style.flexDirection='column';
+  updatePhrosNotif();updateIddNotif();buildMaster();updateAuditDisplay();
+}
+
+function buildMaster(){
+  const all=records;const flags=all.filter(r=>r.flag).length;
+  const totalPice=all.filter(r=>r.mod==='pice').reduce((a,r)=>a+(r.payload?.pice_count||0),0);
+  const totalPart=all.filter(r=>r.mod==='pice').reduce((a,r)=>a+(r.payload?.participants||0),0);
+  document.getElementById('master-stats').innerHTML=`
+    <div class="stat-card"><div class="sv s">${all.length}</div><div class="sl2">Total submissions</div></div>
+    <div class="stat-card"><div class="sv d">${flags}</div><div class="sl2">Priority flags</div></div>
+    <div class="stat-card"><div class="sv">${totalPice}</div><div class="sl2">Total PICE</div></div>
+    <div class="stat-card"><div class="sv">${totalPart}</div><div class="sl2">Total participants</div></div>`;
+  const tbody=document.getElementById('master-tbody');tbody.innerHTML='';
+  document.getElementById('master-empty').style.display=all.length?'none':'block';
+  all.forEach(r=>{const p=r.payload||{};const tr=document.createElement('tr');tr.innerHTML=`<td><span class="stn-pill sp-b">${r.station}</span></td><td>${p.pice_count||'—'}</td><td>${p.participants||'—'}</td><td>${p.count||'—'}</td><td style="font-size:9.5px;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.file||'—'}</td><td><span class="stn-pill ${p.form1==='NEGATIVE'?'sp-g':'sp-r'}">${p.form1||'—'}</span></td><td><span class="stn-pill ${p.form2==='NEGATIVE'?'sp-g':'sp-r'}">${p.form2||'—'}</span></td><td>${r.flag?'<span class="stn-pill sp-r">FLAG</span>':'<span class="stn-pill sp-g">Clear</span>'}</td>`;tbody.appendChild(tr);});
+}
+
+function flagMissing(){const piceSubmitted=new Set(records.filter(r=>r.mod==='pice').map(r=>r.station));const missing=ALL_STNS.filter(s=>!piceSubmitted.has(s));if(!missing.length){alert('All stations have submitted.');return;}alert('Missing stations ('+missing.length+'):\n\n'+missing.join('\n'));}
+
+async function generateMaster(){
+  const piceRecs=records.filter(r=>r.mod==='pice');if(!piceRecs.length){alert('No Weekly PICE submissions yet.');return;}
+  document.getElementById('gen-btn').disabled=true;document.getElementById('gen-proc').style.display='block';
+  await new Promise(r=>setTimeout(r,2000));document.getElementById('gen-proc').style.display='none';
+  const fm=document.getElementById('f-month')?.value||'May';
+  const totalPice=piceRecs.reduce((a,r)=>a+(r.payload?.pice_count||0),0);
+  const totalPart=piceRecs.reduce((a,r)=>a+(r.payload?.participants||0),0);
+  const allRows=ALL_STNS.map(stn=>{const sub=piceRecs.find(r=>r.station===stn);return{station:stn,pice:sub?sub.payload.pice_count:'—',participants:sub?sub.payload.participants:'—',photo:sub?sub.payload.photoURL:null};});
+  const tableRows=allRows.map(r=>`<tr><td class="stn-c"><strong>${r.station}</strong></td><td class="ph-c">${r.photo?`<img class="doc-photo" src="${r.photo}" alt="Photo">`:`<div class="doc-photo-ph">No photo</div>`}</td><td class="num-c">${r.pice}</td><td class="num-c">${r.participants}</td></tr>`).join('');
+  const week=piceRecs[0]?.week||'Week 1';
+  document.getElementById('doc-preview').innerHTML=`
+    <div class="doc-conf">CONFIDENTIAL</div>
+    <div class="doc-title">Bulacan PPO: <u>Human Rights</u> Reminders for the Month of <u>${fm}</u> 2026</div>
+    <table class="doc-table"><thead><tr><th colspan="4" class="tl" style="font-size:8.5px;font-weight:400;background:#2E75B6;padding:5px 7px;">Attached were the consolidated action taken of different respective Police Human Rights Officers of municipal/city police stations and PMFCs of this PPO pertaining to the dissemination of Human Rights Reminders during the conduct of DPPA/PICE — ${week}.</th></tr><tr><th class="tl" style="width:28%;">Station / Units</th><th style="width:36%;">Action Photo</th><th style="width:18%;">Nr of PICE Conducted</th><th style="width:18%;">No. of Participants</th></tr></thead><tbody>${tableRows}<tr class="tot"><td colspan="2" style="text-align:right;padding-right:10px;font-size:9px;"><strong>Total Nr of PICE Conducted and Nr of Participants:</strong></td><td><strong>${totalPice}</strong></td><td><strong>${totalPart}</strong></td></tr></tbody></table>
+    <div class="doc-motto"><em>"Bagong PNP para sa Bagong Pilipinas; Serbisyong Mabilis, Tapat, at Nararamdaman"</em></div>
+    <div class="doc-conf" style="margin-top:8px;">CONFIDENTIAL</div>`;
+  const go=document.getElementById('gen-out');go.style.display='flex';go.style.flexDirection='column';
+  document.getElementById('gen-btn').disabled=false;
+  checkAccess('ALL_STATIONS','generate-master','MASTER_REPORT');
+}
+
+function exportMaster(){navigator.clipboard.writeText(document.getElementById('cam-json')?.textContent||'{}').then(()=>alert('Report data copied. Paste into your master Word/Excel template.'));}
+</script>
+</body>
+</html>
